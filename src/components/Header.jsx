@@ -20,6 +20,8 @@ const Header = () => {
     };
   }, []);
 
+ 
+
   const handleSignOut = (e) => {
     e.preventDefault();
     // In a real app, you would also clear any auth tokens/cookies here
