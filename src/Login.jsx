@@ -1,17 +1,37 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from './api/axios';
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [isRobotChecked, setIsRobotChecked] = useState(false);
+  const [error, setError] = useState('');
+  const recaptchaRef = React.createRef();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In a real app, you would validate and authenticate here. For now, just navigate to the dashboard
-    navigate("/client/dashboard");
+    try {
+      const token = recaptchaRef.current.getValue();
+      if (!token) {
+        alert("Please complete the reCAPTCHA challenge.");
+        return;
+      }
+      const response = await axios.post('/loginfront', {
+        email: email,
+        code: code,
+        token: token
+      });
+
+      navigate('/client/dashboard');
+    } catch (err) {
+      console.error(err);
+      alert(err.response.data.message);
+    }
   };
+  
   return (
     <div className="flex h-screen">
       {/* Left side - Login Form */}
@@ -79,39 +99,10 @@ const Login = () => {
 
             {/* reCAPTCHA */}
             <div className="my-4">
-              <div className="shadow-lg border border-gray-300 rounded-md bg-white p-3 h-[78px] w-full flex items-center">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="not-robot"
-                    checked={isRobotChecked}
-                    onChange={(e) => setIsRobotChecked(e.target.checked)}
-                    required
-                    className="w-5 h-5 border-gray-300 rounded"
-                  />
-                  <label
-                    htmlFor="not-robot"
-                    className="ml-2 text-gray-700 text-sm"
-                  >
-                    I'm not a robot
-                  </label>
-                </div>
-                <div className="ml-auto">
-                  <div className="flex flex-col items-center">
-                    <img
-                      src="https://www.gstatic.com/recaptcha/api2/logo_48.png"
-                      alt="reCAPTCHA"
-                      className="h-8 w-8"
-                    />
-                    <span className="text-[8px] text-gray-500 mt-1">
-                      reCAPTCHA
-                    </span>
-                    <span className="text-[7px] text-gray-400">
-                      Privacy - Terms
-                    </span>
-                  </div>
-                </div>
-              </div>
+                  <ReCAPTCHA
+              sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+              ref={recaptchaRef}
+            />
             </div>
 
             {/* Submit Button */}
