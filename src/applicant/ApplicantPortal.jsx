@@ -6,6 +6,7 @@ import axios from "../api/axios";
 const ApplicantPortal = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [applicantData, setApplicantData] = useState(null);
+  const [applicantStatus, setApplicantStatus] = useState(null);
   const [applicationCode, setApplicationCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const recaptchaRef = React.createRef();
@@ -30,6 +31,7 @@ const ApplicantPortal = () => {
 
       // Store applicant data from response
       setApplicantData(response.data.data);
+      console.log(response.data.statuses);
 
       // Set login status to true
       setIsLoggedIn(true);
@@ -289,7 +291,7 @@ const ApplicantPortal = () => {
                   <div>
                     <p className="text-sm text-gray-500">Application Status</p>
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 mt-1">
-                      {applicantData?.status || "Pending"}
+                      {applicantData?.application_status || "Pending"}
                     </span>
                   </div>
                   <div className="text-right">
@@ -425,6 +427,7 @@ const ApplicantPortal = () => {
                   <h3 className="text-md font-semibold text-gray-700 mb-3 border-b pb-2">
                     Application Timeline
                   </h3>
+                  
 
                   <div className="space-y-3">
                     <div className="flex">
@@ -479,28 +482,7 @@ const ApplicantPortal = () => {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex space-x-2 mt-6">
-                  <button
-                    className="flex-1 py-2 px-4 bg-gradient-to-r from-[#0A2472] to-[#1A3A8F] text-white rounded-lg font-medium hover:from-[#0A2472] hover:to-[#0A2472] transition-all duration-300 shadow-md flex items-center justify-center"
-                    onClick={() => {}}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                      <path
-                        fillRule="evenodd"
-                        d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    View Full Application
-                  </button>
-                </div>
+               
               </div>
             </div>
           </div>
