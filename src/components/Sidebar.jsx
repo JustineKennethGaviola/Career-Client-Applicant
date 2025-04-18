@@ -19,7 +19,7 @@ const Sidebar = () => {
       {/* Navigation Items */}
       <nav className="px-4 pt-6 pb-8">
         <div className="space-y-1">
-          <NavLink
+          {/* <NavLink
             to="/client/dashboard"
             className={({ isActive }) =>
               `flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
@@ -44,7 +44,7 @@ const Sidebar = () => {
               />
             </svg>
             Dashboard
-          </NavLink>
+          </NavLink> */}
 
           <NavLink
             to="/client/applicants"

@@ -10,7 +10,8 @@ const Dashboard = React.lazy(() => import("./Dashboard"));
 
 import ApplicantPortal from "./applicant/ApplicantPortal";
 import logoBlue from "./assets/RCCLogo-Blue.png";
-
+import useAutoLogout from "./hooks/useAutoLogout";
+import DisableConsole from "./hooks/DisableConsole";
 // Client/Company Layout
 const ClientLayout = ({ children }) => (
   <div className="flex h-screen bg-gray-50">
@@ -138,8 +139,10 @@ const NotFoundPage = () => (
 );
 
 function App() {
+  
   return (
     <Router>
+      
       <React.Suspense
         fallback={
           <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -200,3 +203,4 @@ function App() {
 }
 
 export default App;
+

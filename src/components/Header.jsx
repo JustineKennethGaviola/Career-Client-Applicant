@@ -6,6 +6,11 @@ const Header = () => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
+  //check the email from local storage
+  const email = localStorage.getItem("email");
+  const user = localStorage.getItem("user");
+
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -33,13 +38,17 @@ const Header = () => {
       <div className="flex items-center">
         <div className="relative inline-block" ref={dropdownRef}>
           <button
-            className="shadow-lg flex items-center rounded-lg border border-gray-300 px-3 py-2 w-72"
+            className="shadow-lg flex items-center rounded-lg border border-gray-300 px-3 py-2 w-80"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <div className="bg-[#0A2472] text-white rounded-full h-8 w-8 flex items-center justify-center mr-2">
-              <span>C</span>
+              <span>
+                {user ? user.charAt(0).toUpperCase() : "U"}
+              </span>
             </div>
-            <span className="text-gray-700 mr-2">Company Name</span>
+            <span className="text-gray-700 mr-2">
+              {user ? user : "User"}
+            </span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 text-gray-400 ml-auto"
@@ -62,7 +71,9 @@ const Header = () => {
           >
             <div className="py-2">
               <div className="px-4 py-2 border-b border-gray-200">
-                <p className="text-sm text-gray-600">user@company.com</p>
+                <p className="text-sm text-gray-600">
+                   {email}
+                </p>
               </div>
               <button
                 onClick={handleSignOut}

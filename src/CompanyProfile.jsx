@@ -1,16 +1,57 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import axiosInstance from "./api/tokenizedaxios";
 const CompanyProfile = () => {
+    const navigate = useNavigate();
+    const [dashboardData, setDashboardData] = useState(null); // State to store the response data
+    const [error, setError] = useState(null); // State to handle errors
   // State for form inputs
   const [companyInfo, setCompanyInfo] = useState({
-    companyName: "RCC Colab Solutions Inc",
-    companyAddress: "7th Fl. Ascott Hotel Makati City",
-    representative: "",
-    email: "",
-    contactNumber: "",
+    companyName: '',
+    companyAddress: '',
+    representative: '',
+    email: '',
+    contactNumber: '',
+    status: '',
     cc: "",
     bcc: "",
   });
+
+ 
+  // Format cc and bcc as comma-separated strings (but no comma if only 1)
+  
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await axiosInstance.get('/companyprofile');
+
+        if (response.data.status_tokenized === 'error') {
+          localStorage.clear();
+          navigate('/client/login');
+        } else {
+          const data = response.data.companydata;
+         
+         
+          setCompanyInfo({
+            companyName: data.company_name,
+            representative: data.representative_name,
+            email: data.company_email,
+            contactNumber: data.company_phone,
+            status : data.status,
+            cc: data.cc,
+            bcc: data.bcc,
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError('Error fetching data');
+      }
+    };
+
+    fetchDashboardData();
+  }, [navigate]);
+
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -19,11 +60,26 @@ const CompanyProfile = () => {
       [name]: value,
     });
   };
-
-  const handleSubmit = (formType) => {
-    console.log(`Saving ${formType} form:`, companyInfo);
-    // Add API call here to save the data
+  // here use this function to save the email cc and bcc
+  const handleSubmit = async (type) => {
+    try {
+      const response = await axiosInstance.post('/updateemails', {
+        type: type,
+        cc: companyInfo.cc,
+        bcc: companyInfo.bcc,
+      });
+      if (response.data.status_tokenized === 'error') {
+        localStorage.clear();
+        navigate('/client/login');
+      } else {
+        alert(response.data.message);
+      }
+    } catch (err) {
+      console.error('Error saving data:', err);
+      setError('Error saving data');
+    }
   };
+ 
 
   return (
     <div className="p-6">
@@ -60,7 +116,7 @@ const CompanyProfile = () => {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="font-medium">Account is Active</span>
+                <span className="font-medium">Account is {companyInfo.status}</span>
               </div>
             </div>
           </div>
@@ -130,21 +186,11 @@ const CompanyProfile = () => {
                 value={companyInfo.companyName}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md p-2"
+                readOnly
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">
-                Company Address
-              </label>
-              <input
-                type="text"
-                name="companyAddress"
-                value={companyInfo.companyAddress}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
-              />
-            </div>
+          
 
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">
@@ -156,6 +202,7 @@ const CompanyProfile = () => {
                 value={companyInfo.representative}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md p-2"
+                readOnly
               />
             </div>
 
@@ -169,6 +216,7 @@ const CompanyProfile = () => {
                 value={companyInfo.email}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md p-2"
+                readOnly
               />
             </div>
 
@@ -182,17 +230,11 @@ const CompanyProfile = () => {
                 value={companyInfo.contactNumber}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md p-2"
+                readOnly
               />
             </div>
 
-            <div className="flex justify-center">
-              <button
-                onClick={() => handleSubmit("company")}
-                className="bg-blue-900 text-white font-medium py-2 px-10 rounded-full"
-              >
-                Save
-              </button>
-            </div>
+            
           </div>
         </div>
       </div>

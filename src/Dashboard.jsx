@@ -1,6 +1,38 @@
-import React from "react";
-
+import React, { useState, useEffect } from "react";
+import axiosInstance from "./api/tokenizedaxios";
+import { Navigate, useNavigate } from "react-router-dom";
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [dashboardData, setDashboardData] = useState(null); // State to store the response data
+  const [error, setError] = useState(null); // State to handle errors
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await axiosInstance.get('/dashboard');
+
+        // Display the response data in the console (for debugging purposes)
+        console.log('Dashboard Data:', response.data);
+
+        // Check if the status_tokenized is 'error'
+        if (response.data.status_tokenized === 'error') {
+          // Clear local storage to log the user out
+          localStorage.clear();
+
+          // Redirect to login page
+          navigate('/client/login');
+        } else {
+          // Store the response data in the state
+          setDashboardData(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        setError('Error fetching data'); // Set error state if something goes wrong
+      }
+    };
+
+    fetchDashboardData();
+  }, [navigate]);
   return (
     <div className="flex">
       {/* Main Content */}

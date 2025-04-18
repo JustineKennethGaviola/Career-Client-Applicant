@@ -24,8 +24,11 @@ const Login = () => {
         code: code,
         token: token
       });
-
-      navigate('/client/dashboard');
+      
+      localStorage.setItem('token', response.data.data.token);
+      localStorage.setItem('user', response.data.data.user);
+      localStorage.setItem('email', response.data.data.email);
+      navigate('/client/applicants');
     } catch (err) {
       console.error(err);
       alert(err.response.data.message);

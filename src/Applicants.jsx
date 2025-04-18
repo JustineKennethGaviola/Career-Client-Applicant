@@ -1,6 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import axiosInstance from "./api/tokenizedaxios";
 
 const Applicants = () => {
+  const navigate = useNavigate();
+  const [applicants, setApplicants] = useState([]); // State to store fetched applicants
   const [openDropdown, setOpenDropdown] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
@@ -14,57 +18,68 @@ const Applicants = () => {
   const [selectedApplicantForStatus, setSelectedApplicantForStatus] =
     useState(null);
   const [newStatus, setNewStatus] = useState("");
+  const [remarks, setRemarks] = useState('');
+  const [jobs, setJobs] = useState([]); // State to store fetched jobs
 
-  // Sample applicant data
-  const applicants = [
-    {
-      id: 1,
-      name: "Applicant 1",
-      email: "applicant1@gmail.com",
-      position: "UI/UX Designer",
-      dateApplied: "03/26/2019",
-      status: "Shortlisted",
-      statusType: "shortlisted",
-    },
-    {
-      id: 2,
-      name: "Applicant 2",
-      email: "applicant2@gmail.com",
-      position: "UI/UX Designer",
-      dateApplied: "03/26/2019",
-      status: "Rejected",
-      statusType: "rejected",
-    },
-    {
-      id: 3,
-      name: "Applicant 3",
-      email: "applicant3@gmail.com",
-      position: "UI/UX Designer",
-      dateApplied: "03/26/2019",
-      status: "New",
-      statusType: "new",
-    },
-    {
-      id: 4,
-      name: "Applicant 4",
-      email: "applicant4@gmail.com",
-      position: "UI/UX Designer",
-      dateApplied: "03/26/2019",
-      status: "Waiting for feedback",
-      statusType: "waiting",
-    },
-  ];
+  // Handle the change for the remarks field
+  const handleRemarksChange = (e) => {
+    setRemarks(e.target.value);
+  };
+
+  // Fetch data from the database
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await axiosInstance.get("/selectapplicants");
+
+        if (response.data.status_tokenized === "error") {
+          localStorage.clear();
+          navigate("/client/login");
+        } else {
+          const data = response.data.applicants;
+          console.log("Fetched applicants:", data);
+          setApplicants(data); // Update state with fetched data
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+      }
+    };
+
+    fetchDashboardData();
+  }, [navigate]);
+
+
+  useEffect(() => {
+    const fetchJobData = async () => {
+      try {
+        const response = await axiosInstance.get("/positions");
+
+        if (response.data.status_tokenized === "error") {
+          localStorage.clear();
+          navigate("/client/login");
+        } else {
+          const data = response.data.jobpostings;
+          console.log("Fetched applicants:", data);
+          setJobs(data); // Update state with fetched data
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+      }
+    };
+
+    fetchJobData();
+  }, [navigate]);
 
   // Status badge styles
   const getStatusBadgeClasses = (statusType) => {
     switch (statusType) {
-      case "waiting":
+      case "Waiting for Job Offer":
         return "bg-green-100 text-green-800";
-      case "rejected":
+      case "Rejected":
         return "bg-red-100 text-red-800";
-      case "new":
+      case "New":
         return "bg-blue-100 text-blue-800";
-      case "shortlisted":
+      case "Shortlisted":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -95,30 +110,42 @@ const Applicants = () => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
 
-  // Close dropdown when clicking outside
   const handleClickOutside = (e) => {
     if (!e.target.closest(".dropdown-container")) {
       setOpenDropdown(null);
     }
   };
 
-  const handleStatusUpdate = () => {
-    // Sample API Call
-    console.log(
-      `Updating status for ${selectedApplicantForStatus.name} to ${newStatus}`
+  const handleStatusUpdate = async (e) => {
+   
+      
+  
+      // Optionally, you can also perform other actions, such as saving the status to your database
+    const updateapplicantresponse = await axiosInstance.post(
+      "/updateapplicant",
+      {
+        id: selectedApplicantForStatus.id,
+        status: newStatus,
+        remarks: remarks,
+      }
+      
     );
-
-    // Close the modal
-    setShowStatusModal(false);
+    console.log("Update response:", updateapplicantresponse.data);
+    
+   
+  
+    
+    window.location.reload();
   };
 
-  // Add event listener to close dropdowns when clicking outside
   React.useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+
 
   return (
     <div className="p-6">
@@ -146,10 +173,12 @@ const Applicants = () => {
                 className="block w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 appearance-none"
               >
                 <option>All Positions</option>
-                <option>UI/UX Designer</option>
-                <option>Frontend Developer</option>
-                <option>Backend Developer</option>
-                <option>IT Support</option>
+                {jobs.map((job) => (
+                  <option key={job.id} value={job.jobtitle}>
+                    {job.jobtitle}
+                  </option>
+                ))}
+               
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                 <svg
@@ -202,39 +231,7 @@ const Applicants = () => {
             </div>
           </div>
 
-          {/* Date Applied Filter */}
-          <div className="w-48">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date Applied
-            </label>
-            <div className="relative">
-              <select
-                value={filters.dateApplied}
-                onChange={(e) => handleFilterChange(e, "dateApplied")}
-                className="block w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 appearance-none"
-              >
-                <option>All Dates</option>
-                <option>Today</option>
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
-                <option>This Month</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg
-                  className="h-5 w-5 text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+         
         </div>
 
         {/* Search Bar */}
@@ -292,11 +289,11 @@ const Applicants = () => {
                   <td className="py-3 px-1">
                     <div className="flex items-center">
                       <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 mr-3">
-                        {applicant.name.charAt(0)}
+                        {applicant.firstname.charAt(0)}
                       </div>
                       <div>
                         <div className="text-sm font-medium">
-                          {applicant.name}
+                          {applicant.firstname + " " + applicant.lastname}
                         </div>
                         <div className="text-xs text-gray-500">
                           {applicant.email}
@@ -305,18 +302,18 @@ const Applicants = () => {
                     </div>
                   </td>
                   <td className="py-3 px-1 text-sm text-center">
-                    {applicant.position}
+                    {applicant.jobtitle}
                   </td>
                   <td className="py-3 px-1 text-sm text-center">
-                    {applicant.dateApplied}
+                    {applicant.created_at.split("T")[0]}
                   </td>
                   <td className="py-3 px-1 text-center">
                     <span
                       className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClasses(
-                        applicant.statusType
+                        applicant.applicant_status
                       )}`}
                     >
-                      {applicant.status}
+                      {applicant.applicant_status}
                     </span>
                   </td>
                   <td className="py-3 px-1 text-center relative dropdown-container">
@@ -338,16 +335,7 @@ const Applicants = () => {
                         openDropdown === applicant.id ? "block" : "hidden"
                       } absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 py-1 text-left`}
                     >
-                      <a
-                        href="#"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleOpenEmailModal(applicant);
-                        }}
-                      >
-                        Send Email
-                      </a>
+                     
                       <a
                         href="#"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -447,7 +435,7 @@ const Applicants = () => {
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
-                Update Status for {selectedApplicantForStatus.name}
+                Update Status for {selectedApplicantForStatus.firstname + " " + selectedApplicantForStatus.lastname}
               </h3>
               <button
                 onClick={() => setShowStatusModal(false)}
@@ -468,8 +456,9 @@ const Applicants = () => {
                 </svg>
               </button>
             </div>
-
+            
             <div className="mb-6">
+            <input type="hidden" name="id" value={selectedApplicantForStatus.id} />
               <label className="block text-sm font-medium mb-1">
                 New Status
               </label>
@@ -478,13 +467,29 @@ const Applicants = () => {
                 onChange={(e) => setNewStatus(e.target.value)}
                 className="block w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="New">New</option>
-                <option value="Waiting for feedback">
-                  Waiting for feedback
+                <option value="" selected disabled>Select Status</option>
+                <option value="Waiting for Feedback">
+                Waiting for Feedback
                 </option>
+
+                <option value="For Interview">For Interview</option>
+                <option value="For Assessment">For Assessment</option>
+                <option value="Decline">Decline</option>
                 <option value="Rejected">Rejected</option>
-                <option value="Shortlisted">Shortlisted</option>
+                <option value="Hired">Hired</option>
               </select>
+            </div>
+            <div className="mb-6">
+                <label className="block text-sm font-medium mb-1">
+                  Remarks
+                </label>
+                <textarea
+                name="remarks"
+                value={remarks} // Controlled value
+                onChange={handleRemarksChange} // Handling the change
+                  className="w-full border border-gray-300 rounded-md p-2 h-20"
+                  placeholder="Type your remarks here..."
+                ></textarea>
             </div>
 
             <div className="flex justify-end gap-2">
