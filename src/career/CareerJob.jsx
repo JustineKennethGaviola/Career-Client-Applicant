@@ -1,52 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import careerBackground from "../assets/Career.png";
+import axiosInstance from "./../api/axios";
 
 const CareerJob = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [location, setLocation] = useState("");
-  const [department, setDepartment] = useState("");
-  const [workType, setWorkType] = useState("");
-  const [expandedJobId, setExpandedJobId] = useState(null);
   const navigate = useNavigate();
+  const [jobListings, setJobListings] = useState([]);
+  const [expandedJobId, setExpandedJobId] = useState(null);
+  const [filters, setFilters] = useState({
+    searchTerm: "",
+    location: "",
+    workType: "",
+  });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchJobPost = async () => {
+      try {
+        const response = await axiosInstance.get("/getjob");
+        if (response.data.status_tokenized === "error") {
+          localStorage.clear();
+          navigate("/client/login");
+        } else {
+          setJobListings(response.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("Error fetching data");
+      }
+    };
+
+    fetchJobPost();
+  }, [navigate]);
 
   const toggleJobExpansion = (index) => {
-    if (expandedJobId === index) {
-      setExpandedJobId(null);
-    } else {
-      setExpandedJobId(index);
-    }
+    setExpandedJobId(expandedJobId === index ? null : index);
   };
 
-  // Sample job listings
-  const jobListings = [
-    {
-      title: "Information Technology",
-      description: "Lorem ipsum dolor sit amet, consectetur adipisci elit",
-      type: "Full-Time",
-      location: "Lorem ipsum dolor sit amet",
-      summary:
-        "It Lorem ipsum dolor sit amet, consectetur adipisci elit. Sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.\n\nLorem ipsum dolor sit amet, consectetur adipisci elit. Sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.",
-    },
-    {
-      title: "Back End Software Engineer",
-      description: "Lorem ipsum dolor sit amet, consectetur adipisci elit",
-      type: "Full-Time",
-      location: "Lorem ipsum dolor sit amet",
-      summary:
-        "It Lorem ipsum dolor sit amet, consectetur adipisci elit. Sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.\n\nLorem ipsum dolor sit amet, consectetur adipisci elit. Sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.",
-    },
-    {
-      title: "Quality Assurance Specialist",
-      description: "Lorem ipsum dolor sit amet, consectetur adipisci elit",
-      type: "Full-Time",
-      location: "Lorem ipsum dolor sit amet",
-      summary:
-        "It Lorem ipsum dolor sit amet, consectetur adipisci elit. Sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.\n\nLorem ipsum dolor sit amet, consectetur adipisci elit. Sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.",
-    },
-  ];
+  const filteredJobs = jobListings.filter((job) => {
+    const matchesSearch = job.jobtitle
+      .toLowerCase()
+      .includes(filters.searchTerm.toLowerCase());
+    const matchesLocation = filters.joblocation
+      ? job.location.toLowerCase().includes(filters.location.toLowerCase())
+      : true;
+    const matchesWorkType = filters.jobtype
+      ? job.type.toLowerCase() === filters.jobtype.toLowerCase()
+      : true;
+    return matchesSearch && matchesLocation && matchesWorkType;
+  });
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -57,33 +61,21 @@ const CareerJob = () => {
         className="relative bg-[#0A2472] overflow-hidden"
         style={{ clipPath: "polygon(100% 1%, 100% 85%, 50% 100%, 0 85%, 0 0)" }}
       >
-        {/* Image */}
         <img
           src={careerBackground}
           alt="Background"
           className="absolute w-full h-full object-cover object-center opacity-20"
         />
-
-        <div className="relative z-10">
-          <div className="max-w-screen-xl mx-auto">
-            <div className="flex flex-col items-center justify-center pt-[150px] pb-[150px] h-fit px-6 lg:px-0">
-              <h1 className="text-white text-2xl sm:text-4xl lg:text-5xl font-semibold text-center">
-                Grow your Career at RCC Colab Solutions
-              </h1>
-              <p className="mt-6 text-white/80 max-w-3xl text-base sm:text-lg text-justify leading-relaxed">
-                Lorem ipsum dolor sit amet, consectetur adipisci elit, sed
-                eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrum exercitationem ullam corporis
-                suscipit laborious, nisi ut aliquid ex ea commodi consequatur.
-              </p>
-              <a
-                href="#open-positions"
-                className="mt-8 inline-block border-2 border-orange-500 text-white rounded-full px-8 py-3 hover:bg-orange-500 transition"
-              >
-                View Open Positions
-              </a>
-            </div>
-          </div>
+        <div className="relative z-10 max-w-screen-xl mx-auto flex flex-col items-center justify-center pt-[150px] pb-[150px] px-6 lg:px-0">
+          <h1 className="text-white text-2xl sm:text-4xl lg:text-5xl font-semibold text-center">
+            Grow your Career at RCC Colab Solutions
+          </h1>
+          <a
+            href="#open-positions"
+            className="mt-8 inline-block border-2 border-orange-500 text-white rounded-full px-8 py-3 hover:bg-orange-500 transition"
+          >
+            View Open Positions
+          </a>
         </div>
       </div>
 
@@ -93,107 +85,50 @@ const CareerJob = () => {
           <h2 className="text-3xl font-bold text-center mb-3 text-[#0A2472]">
             Join the RCC Colab Solution
           </h2>
-          <p className="text-gray-600 mb-12 max-w-xl mx-auto text-justify leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod
-            tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim
-            veniam, quis nostrum exercitationem ullam corporis suscipit.
-          </p>
+          <p className="text-gray-600 mb-12 max-w-xl mx-auto text-justify leading-relaxed" />
 
           {/* Search Filters */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-12">
-            <div className="col-span-1 md:col-span-2">
-              <input
-                type="text"
-                placeholder="Search Job Title..."
-                className="w-full p-3 border border-gray-300 rounded"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div>
-              <div className="relative">
-                <select
-                  className="w-full p-3 border border-gray-300 rounded appearance-none bg-white"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                >
-                  <option value="">Location</option>
-                  <option value="remote">Remote</option>
-                  <option value="office">Office</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <select
-                className="w-full p-3 border border-gray-300 rounded appearance-none bg-white"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-              >
-                <option value="">Department</option>
-                <option value="it">IT</option>
-                <option value="hr">HR</option>
-                <option value="marketing">Marketing</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div className="relative">
-              <select
-                className="w-full p-3 border border-gray-300 rounded appearance-none bg-white"
-                value={workType}
-                onChange={(e) => setWorkType(e.target.value)}
-              >
-                <option value="">Work Type</option>
-                <option value="full-time">Full-time</option>
-                <option value="part-time">Part-time</option>
-                <option value="contract">Contract</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
+            <input
+              type="text"
+              placeholder="Search Job Title..."
+              className="col-span-1 md:col-span-2 w-full p-3 border border-gray-300 rounded"
+              value={filters.searchTerm}
+              onChange={(e) =>
+                setFilters({ ...filters, searchTerm: e.target.value })
+              }
+            />
+
+            <select
+              className="w-full p-3 border border-gray-300 rounded bg-white"
+              value={filters.location}
+              onChange={(e) =>
+                setFilters({ ...filters, location: e.target.value })
+              }
+            >
+              <option value="">Location</option>
+              <option value="remote">Remote</option>
+              <option value="office">Office</option>
+            </select>
+
+            <select
+              className="w-full p-3 border border-gray-300 rounded bg-white"
+              value={filters.workType}
+              onChange={(e) =>
+                setFilters({ ...filters, workType: e.target.value })
+              }
+            >
+              <option value="">Work Type</option>
+              <option value="full-time">Full-time</option>
+              <option value="part-time">Part-time</option>
+              <option value="contract">Contract</option>
+            </select>
           </div>
 
           {/* Job Listings */}
+          {error && <p className="text-red-600 mb-4">{error}</p>}
           <div className="space-y-6">
-            {jobListings.map((job, index) => (
+            {filteredJobs.map((job, index) => (
               <div
                 key={index}
                 className={`border border-gray-200 rounded-lg p-6 shadow-sm transition cursor-pointer ${
@@ -212,7 +147,7 @@ const CareerJob = () => {
                           : "group-hover:text-white"
                       } transition-colors`}
                     >
-                      {job.title}
+                      {job.jobtitle}
                     </h3>
                     <p
                       className={`${
@@ -221,109 +156,66 @@ const CareerJob = () => {
                           : "text-gray-600 group-hover:text-white/90"
                       } transition-colors`}
                     >
-                      {job.description}
+                      {job.jobdescription}
                     </p>
                   </div>
                   <div className="min-w-[200px]">
-                    <div className="mb-3">
-                      <p
-                        className={`font-medium ${
-                          expandedJobId === index
-                            ? "text-gray-700"
-                            : "text-gray-700 group-hover:text-white"
-                        } transition-colors`}
-                      >
-                        Work Type
-                      </p>
-                      <p
-                        className={`${
-                          expandedJobId === index
-                            ? "text-gray-600"
-                            : "text-gray-600 group-hover:text-white/90"
-                        } transition-colors`}
-                      >
-                        {job.type}
-                      </p>
-                    </div>
-                    <div>
-                      <p
-                        className={`font-medium ${
-                          expandedJobId === index
-                            ? "text-gray-700"
-                            : "text-gray-700 group-hover:text-white"
-                        } transition-colors`}
-                      >
-                        Location
-                      </p>
-                      <p
-                        className={`${
-                          expandedJobId === index
-                            ? "text-gray-600"
-                            : "text-gray-600 group-hover:text-white/90"
-                        } transition-colors`}
-                      >
-                        {job.location}
-                      </p>
-                    </div>
+                    <p className="font-medium text-gray-700 group-hover:text-white">
+                      Work Type
+                    </p>
+                    <p className="text-gray-600 group-hover:text-white/90">
+                      {job.jobtype}
+                    </p>
+                    <p className="font-medium mt-3 text-gray-700 group-hover:text-white">
+                      Location
+                    </p>
+                    <p className="text-gray-600 group-hover:text-white/90">
+                      {job.joblocation}
+                    </p>
                   </div>
-                  <div className="flex items-center mt-4 md:mt-0">
-                    <div
-                      className={`${
-                        expandedJobId === index
-                          ? "text-blue-800"
-                          : "text-blue-800 group-hover:text-white"
-                      } transition-colors`}
+                  <div className="flex items-center mt-4 md:mt-0 text-blue-800 group-hover:text-white">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`h-6 w-6 transition-transform ${
+                        expandedJobId === index ? "rotate-180" : ""
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className={`h-6 w-6 transition-transform ${
-                          expandedJobId === index ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
                   </div>
                 </div>
 
                 {/* Expanded job details section */}
                 {expandedJobId === index && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-lg font-semibold mb-2 text-[#0A2472]">
-                          Job Summary
-                        </h4>
-                        <p className="text-gray-700 whitespace-pre-line">
-                          {job.summary}
-                        </p>
-                      </div>
-                      <div className="flex justify-end">
-                        <button
-                          className="bg-[#0A2472] text-white px-6 py-2 rounded hover:bg-blue-900 transition"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Navigate to the Career page with job details
-                            // You'll need to import useNavigate from react-router-dom at the top of your file
-                            navigate(`/career`, {
-                              state: {
-                                jobTitle: job.title,
-                                jobDescription: job.summary,
-                              },
-                            });
-                          }}
-                        >
-                          Apply
-                        </button>
-                      </div>
+                    <h4 className="text-lg font-semibold mb-2 text-[#0A2472]">
+                      Job Summary
+                    </h4>
+                    <p className="text-gray-700 whitespace-pre-line">
+                      {job.others}
+                    </p>
+                    <div className="flex justify-end mt-6">
+                      <button
+                        className="bg-[#0A2472] text-white px-6 py-2 rounded hover:bg-blue-900 transition"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/career`, {
+                            state: {
+                              jobId: job.jobcode,
+                            },
+                          });
+                        }}
+                      >
+                        Apply
+                      </button>
                     </div>
                   </div>
                 )}
