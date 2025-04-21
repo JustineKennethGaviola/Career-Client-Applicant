@@ -273,10 +273,16 @@ const Applicants = () => {
                 className="block w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 appearance-none"
               >
                 <option>All Statuses</option>
-                <option>New</option>
-                <option>Waiting for feedback</option>
-                <option>Rejected</option>
-                <option>Shortlisted</option>
+              
+                <option value="Waiting for Feedback">
+                  Waiting for Feedback
+                </option>
+
+                <option value="For Interview">For Interview</option>
+                <option value="For Assessment">For Assessment</option>
+                <option value="Decline">Decline</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Hired">Hired</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                 <svg
