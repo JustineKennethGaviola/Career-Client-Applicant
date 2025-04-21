@@ -1,12 +1,48 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import careerBackground from "../assets/Career.png";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useLocation } from "react-router-dom";
+import axiosInstance from "./../api/axios";
+
 
 const Career = () => {
+ 
+  const recaptchaRef = React.createRef();
+  const navigate = useNavigate();
+  const [recaptchaValue, setRecaptchaValue] = useState(null);
+  const location = useLocation();
+  const jobId = location.state?.jobId; // Assuming jobId is passed via navigate
+  const [jobData, setJobData] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchJobPostSpecific = async () => {
+      try {
+        const response = await axiosInstance.get("/getjob/" + jobId);
+        if (response.data.status_tokenized === "error") {
+          localStorage.clear();
+          navigate("/client/login");
+        } else {
+
+          setJobData(response.data.data);
+          console.log(response.data.data);
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("Error fetching data");
+      }
+    };
+
+    if (jobId) {
+      fetchJobPostSpecific();
+    }
+  }, [jobId, navigate]);
+
   const [formData, setFormData] = useState({
+    
     firstName: "",
     lastName: "",
     middleName: "",
@@ -20,15 +56,11 @@ const Career = () => {
     secondChoice: "",
     thirdChoice: "",
     findSource: "",
+    priority: jobId ,
     agreeToTerms: false,
   });
-  const [recaptchaValue, setRecaptchaValue] = useState(null);
-  const location = useLocation();
-  const jobTitle = location.state?.jobTitle || "Back End Software Engineer";
-  const jobDescription =
-    location.state?.jobDescription ||
-    "Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.";
-
+ 
+  
   const [cvFile, setCvFile] = useState(null);
   const [fileName, setFileName] = useState(
     "Browse file (.pdf, .doc, .docx up to 5MB)"
@@ -36,10 +68,15 @@ const Career = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
+    
+    
+    // Update form data state
+    setFormData((prevData) => ({
+      ...prevData,
       [name]: type === "checkbox" ? checked : value,
-    });
+      
+      
+    }));
   };
 
   const handleRecaptchaChange = (value) => {
@@ -55,16 +92,16 @@ const Career = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!recaptchaValue) {
-      alert("Please complete the reCAPTCHA");
+    const token = recaptchaRef.current.getValue();
+    if (!token) {
+      showToast("Please complete the reCAPTCHA challenge.", "error");
       return;
     }
 
     // Rest of your form submission logic
     console.log("Form Data:", formData);
     console.log("CV File:", cvFile);
-    console.log("reCAPTCHA:", recaptchaValue);
+    console.log("reCAPTCHA:", token);
   };
 
   useEffect(() => {
@@ -90,10 +127,10 @@ const Career = () => {
           <div className="max-w-screen-xl mx-auto">
             <div className="flex flex-col items-center justify-center pt-[150px] pb-[150px] h-fit px-6 lg:px-0">
               <h1 className="text-white text-2xl sm:text-4xl lg:text-5xl font-semibold text-center">
-                {jobTitle}
+              {jobData ? jobData.jobtitle : "Loading..."}
               </h1>
               <p className="mt-6 text-white/80 max-w-xl text-base sm:text-lg text-justify leading-relaxed">
-                {jobDescription}
+                {jobData ? jobData.jobdescription : "Loading..."}
               </p>
             </div>
           </div>
@@ -446,7 +483,7 @@ const Career = () => {
                 id="cv"
                 name="cv"
                 className="hidden"
-                accept=".pdf,.doc,.docx"
+                accept=".pdf"
                 onChange={handleFileChange}
               />
               <div className="flex flex-col items-center">
@@ -479,10 +516,11 @@ const Career = () => {
             {/* reCAPTCHA placeholder - would need to use a React reCAPTCHA component */}
             <div className="flex justify-center">
               <ReCAPTCHA
-                sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI" // Replace with your actual site key
-                onChange={handleRecaptchaChange}
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                ref={recaptchaRef}
               />
             </div>
+           
 
             {/* Terms & Conditions - Centered */}
             <div className="mt-6 flex items-center justify-center mb-6">
