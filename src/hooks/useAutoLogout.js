@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const useAutoLogout = () => {
+const useAutoLogout = (redirectPath = "/client/login") => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,26 +12,42 @@ const useAutoLogout = () => {
     const resetTimer = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        // Clear localStorage and redirect to login page
-        localStorage.clear();
-        navigate('/login'); // Redirect to login
+        // Check if user is actually logged in before logging out
+        if (localStorage.getItem("token") || localStorage.getItem("user")) {
+          // Clear localStorage and redirect to login page
+          localStorage.clear();
+          // Optional: Inform user about session expiration
+          alert("Your session has expired due to inactivity.");
+          navigate(redirectPath);
+        }
       }, inactivityLimit);
     };
 
-    // Detect user activities (mousemove, keyboard, etc.)
-    window.addEventListener('mousemove', resetTimer);
-    window.addEventListener('keypress', resetTimer);
+    // Detect user activities
+    const activities = [
+      "mousemove",
+      "mousedown",
+      "keypress",
+      "scroll",
+      "touchstart",
+    ];
+
+    // Add event listeners for all activities
+    activities.forEach((activity) => {
+      window.addEventListener(activity, resetTimer);
+    });
 
     // Initialize the timer when the component mounts
     resetTimer();
 
     return () => {
-      // Clean up the event listeners when the component unmounts
-      window.removeEventListener('mousemove', resetTimer);
-      window.removeEventListener('keypress', resetTimer);
+      // Clean up all event listeners when the component unmounts
+      activities.forEach((activity) => {
+        window.removeEventListener(activity, resetTimer);
+      });
       clearTimeout(timeout);
     };
-  }, [navigate]);
+  }, [navigate, redirectPath]);
 };
 
 export default useAutoLogout;

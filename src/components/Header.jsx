@@ -10,7 +10,6 @@ const Header = () => {
   const email = localStorage.getItem("email");
   const user = localStorage.getItem("user");
 
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -25,12 +24,14 @@ const Header = () => {
     };
   }, []);
 
- 
-
   const handleSignOut = (e) => {
     e.preventDefault();
-    // In a real app, you would also clear any auth tokens/cookies here
-    navigate("/login");
+    // Clear localStorage items
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("email");
+    // Navigate to landing page
+    navigate("/");
   };
 
   return (
@@ -42,13 +43,9 @@ const Header = () => {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
             <div className="bg-[#0A2472] text-white rounded-full h-8 w-8 flex items-center justify-center mr-2">
-              <span>
-                {user ? user.charAt(0).toUpperCase() : "U"}
-              </span>
+              <span>{user ? user.charAt(0).toUpperCase() : "U"}</span>
             </div>
-            <span className="text-gray-700 mr-2">
-              {user ? user : "User"}
-            </span>
+            <span className="text-gray-700 mr-2">{user ? user : "User"}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 text-gray-400 ml-auto"
@@ -71,9 +68,7 @@ const Header = () => {
           >
             <div className="py-2">
               <div className="px-4 py-2 border-b border-gray-200">
-                <p className="text-sm text-gray-600">
-                   {email}
-                </p>
+                <p className="text-sm text-gray-600">{email}</p>
               </div>
               <button
                 onClick={handleSignOut}

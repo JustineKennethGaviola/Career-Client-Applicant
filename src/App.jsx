@@ -5,6 +5,8 @@ import Header from "./components/Header";
 import Login from "./Login";
 import Applicants from "./Applicants";
 import CompanyProfile from "./CompanyProfile";
+import CareerJob from "./career/CareerJob";
+import Career from "./career/Career";
 
 const Dashboard = React.lazy(() => import("./Dashboard"));
 
@@ -12,23 +14,34 @@ import ApplicantPortal from "./applicant/ApplicantPortal";
 import logoBlue from "./assets/RCCLogo-Blue.png";
 import useAutoLogout from "./hooks/useAutoLogout";
 import DisableConsole from "./hooks/DisableConsole";
+
 // Client/Company Layout
-const ClientLayout = ({ children }) => (
-  <div className="flex h-screen bg-gray-50">
-    <Sidebar />
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <Header />
-      <main className="flex-1 overflow-y-auto p-4 bg-gray-50">{children}</main>
+const ClientLayout = ({ children }) => {
+  useAutoLogout("/client/login");
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-4 bg-gray-50">
+          {children}
+        </main>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Applicant Layout
-const ApplicantLayout = ({ children }) => (
-  <div className="flex flex-col min-h-screen bg-gray-50">
-    <main className="flex-1 container mx-auto p-4">{children}</main>
-  </div>
-);
+const ApplicantLayout = ({ children }) => {
+  useAutoLogout("/applicant/portal");
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <main className="flex-1 container mx-auto p-4">{children}</main>
+    </div>
+  );
+};
 
 // Landing page component
 const LandingPage = () => (
@@ -139,10 +152,8 @@ const NotFoundPage = () => (
 );
 
 function App() {
-  
   return (
     <Router>
-      
       <React.Suspense
         fallback={
           <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -191,6 +202,9 @@ function App() {
             }
           />
 
+          <Route path="/careerjob" element={<CareerJob />} />
+          <Route path="/career" element={<Career />} />
+
           {/* Root route */}
           <Route path="/" element={<LandingPage />} />
 
@@ -203,4 +217,3 @@ function App() {
 }
 
 export default App;
-

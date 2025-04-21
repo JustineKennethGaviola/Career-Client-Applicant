@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import careerBackground from "./assets/Career.png";
+import careerBackground from "../assets/Career.png";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ReCAPTCHA from "react-google-recaptcha";
