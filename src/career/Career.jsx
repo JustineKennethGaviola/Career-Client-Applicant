@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import careerBackground from "../assets/Career.png";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ReCAPTCHA from "react-google-recaptcha";
-import { useLocation } from "react-router-dom";
 import axiosInstance from "./../api/axios";
 
-
 const Career = () => {
- 
   const recaptchaRef = React.createRef();
   const navigate = useNavigate();
   const [recaptchaValue, setRecaptchaValue] = useState(null);
@@ -17,6 +14,7 @@ const Career = () => {
   const jobId = location.state?.jobId; // Assuming jobId is passed via navigate
   const [jobData, setJobData] = useState(null);
   const [error, setError] = useState("");
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
     const fetchJobPostSpecific = async () => {
@@ -26,7 +24,6 @@ const Career = () => {
           localStorage.clear();
           navigate("/client/login");
         } else {
-
           setJobData(response.data.data);
           console.log(response.data.data);
         }
@@ -42,7 +39,6 @@ const Career = () => {
   }, [jobId, navigate]);
 
   const [formData, setFormData] = useState({
-    
     firstName: "",
     lastName: "",
     middleName: "",
@@ -56,11 +52,10 @@ const Career = () => {
     secondChoice: "",
     thirdChoice: "",
     findSource: "",
-    priority: jobId ,
+    priority: jobId,
     agreeToTerms: false,
   });
- 
-  
+
   const [cvFile, setCvFile] = useState(null);
   const [fileName, setFileName] = useState(
     "Browse file (.pdf, .doc, .docx up to 5MB)"
@@ -68,14 +63,11 @@ const Career = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    
+
     // Update form data state
     setFormData((prevData) => ({
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
-      
-      
     }));
   };
 
@@ -85,23 +77,117 @@ const Career = () => {
 
   const handleFileChange = (e) => {
     if (e.target.files[0]) {
-      setCvFile(e.target.files[0]);
-      setFileName(e.target.files[0].name);
+      const file = e.target.files[0];
+      const validTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!validTypes.includes(file.type)) {
+        alert("Please upload a PDF, DOC, or DOCX file.");
+        return;
+      }
+
+      if (file.size > maxSize) {
+        alert("File size must be less than 5MB.");
+        return;
+      }
+
+      setCvFile(file);
+      setFileName(file.name);
+      setShowConfirmation(true);
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     const token = recaptchaRef.current.getValue();
     if (!token) {
-      showToast("Please complete the reCAPTCHA challenge.", "error");
+      alert("Please complete the reCAPTCHA challenge.");
       return;
     }
 
-    // Rest of your form submission logic
-    console.log("Form Data:", formData);
-    console.log("CV File:", cvFile);
-    console.log("reCAPTCHA:", token);
+    if (!cvFile) {
+      alert("Please upload your CV.");
+      return;
+    }
+
+    try {
+      const cvFormData = new FormData();
+      cvFormData.append("cv", cvFile);
+
+      const uploadResponse = await axiosInstance.post("uploadcv", cvFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (uploadResponse.data.status !== "success") {
+        throw new Error("Failed to upload CV");
+      }
+
+      const applicationData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        middleName: formData.middleName || "",
+        suffix: formData.suffix || "",
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        linkedin: formData.linkedin || "",
+        portfolio: formData.portfolio || "",
+        github: formData.github || "",
+        secondChoice: formData.secondChoice || "",
+        thirdChoice: formData.thirdChoice || "",
+        findSource: formData.findSource,
+        priority: jobId,
+        cv_url: uploadResponse.data.data.url,
+        recaptchaToken: token,
+      };
+
+      const applicationResponse = await axiosInstance.post(
+        "applyjob",
+        applicationData
+      );
+
+      if (applicationResponse.data.status === "success") {
+        alert(
+          `Application submitted successfully! Your reference code is: ${applicationResponse.data.data.reference_code}`
+        );
+
+        navigate("/", {
+          state: {
+            referenceCode: applicationResponse.data.data.reference_code,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting application:", error);
+
+      if (error.response && error.response.data) {
+        console.log("Server response:", error.response.data);
+
+        if (error.response.data.errors) {
+          const errorMessages = Object.values(error.response.data.errors)
+            .flat()
+            .join("\n");
+          alert(`Validation errors:\n${errorMessages}`);
+        } else if (error.response.data.message) {
+          alert(`Error: ${error.response.data.message}`);
+        } else {
+          alert(
+            "An error occurred while submitting your application. Please try again later."
+          );
+        }
+      } else {
+        alert(
+          "An error occurred while submitting your application. Please try again later."
+        );
+      }
+    }
   };
 
   useEffect(() => {
@@ -127,7 +213,7 @@ const Career = () => {
           <div className="max-w-screen-xl mx-auto">
             <div className="flex flex-col items-center justify-center pt-[150px] pb-[150px] h-fit px-6 lg:px-0">
               <h1 className="text-white text-2xl sm:text-4xl lg:text-5xl font-semibold text-center">
-              {jobData ? jobData.jobtitle : "Loading..."}
+                {jobData ? jobData.jobtitle : "Loading..."}
               </h1>
               <p className="mt-6 text-white/80 max-w-xl text-base sm:text-lg text-justify leading-relaxed">
                 {jobData ? jobData.jobdescription : "Loading..."}
@@ -520,7 +606,6 @@ const Career = () => {
                 ref={recaptchaRef}
               />
             </div>
-           
 
             {/* Terms & Conditions - Centered */}
             <div className="mt-6 flex items-center justify-center mb-6">
@@ -555,6 +640,48 @@ const Career = () => {
         </form>
       </div>
       <Footer />
+      {/* CV Upload Confirmation Dialog */}
+      {showConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <div className="flex items-center mb-4">
+              <div className="bg-green-100 p-2 rounded-full mr-3">
+                <svg
+                  className="w-6 h-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">
+                CV Upload Successful
+              </h3>
+            </div>
+
+            <p className="text-gray-600 mb-4">
+              Your file <span className="font-medium">{fileName}</span> has been
+              successfully uploaded.
+            </p>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowConfirmation(false)}
+                className="px-4 py-2 bg-[#0A2472] text-white rounded hover:bg-blue-700 transition"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

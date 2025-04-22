@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import careerBackground from "../assets/Career.png";
 import axiosInstance from "./../api/axios";
+import DOMPurify from "dompurify";
 
 const CareerJob = () => {
   const navigate = useNavigate();
@@ -70,6 +71,11 @@ const CareerJob = () => {
           <h1 className="text-white text-2xl sm:text-4xl lg:text-5xl font-semibold text-center">
             Grow your Career at RCC Colab Solutions
           </h1>
+          <p className="text-white text-center mt-4 max-w-2xl opacity-90">
+            Join our dynamic team and be part of innovative solutions that shape
+            the future. We offer exciting opportunities for professional growth
+            in a collaborative environment.
+          </p>
           <a
             href="#open-positions"
             className="mt-8 inline-block border-2 border-orange-500 text-white rounded-full px-8 py-3 hover:bg-orange-500 transition"
@@ -85,6 +91,11 @@ const CareerJob = () => {
           <h2 className="text-3xl font-bold text-center mb-3 text-[#0A2472]">
             Join the RCC Colab Solution
           </h2>
+          <p className="text-gray-600 mb-12 max-w-xl mx-auto text-center leading-relaxed">
+            We're looking for talented individuals who are passionate about
+            technology and innovation. Explore our current openings below and
+            take the next step in your professional journey with us.
+          </p>
           <p className="text-gray-600 mb-12 max-w-xl mx-auto text-justify leading-relaxed" />
 
           {/* Search Filters */}
@@ -196,26 +207,33 @@ const CareerJob = () => {
                 {/* Expanded job details section */}
                 {expandedJobId === index && (
                   <div className="mt-6 pt-6 border-t border-gray-200">
-                    <h4 className="text-lg font-semibold mb-2 text-[#0A2472]">
+                    <h4 className="text-lg font-semibold mb-4 text-[#0A2472]">
                       Job Summary
                     </h4>
-                    <p className="text-gray-700 whitespace-pre-line">
-                      {job.others}
-                    </p>
-                    <div className="flex justify-end mt-6">
-                      <button
-                        className="bg-[#0A2472] text-white px-6 py-2 rounded hover:bg-blue-900 transition"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/career`, {
-                            state: {
-                              jobId: job.jobcode,
-                            },
-                          });
+
+                    <div className="space-y-6">
+                      <div
+                        className="text-gray-700 pl-4 space-y-2"
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(job.others),
                         }}
-                      >
-                        Apply
-                      </button>
+                      />
+
+                      <div className="flex justify-end mt-8">
+                        <button
+                          className="bg-[#0A2472] text-white px-6 py-2 rounded hover:bg-blue-900 transition"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/career`, {
+                              state: {
+                                jobId: job.jobcode,
+                              },
+                            });
+                          }}
+                        >
+                          Apply
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

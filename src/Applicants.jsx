@@ -273,7 +273,7 @@ const Applicants = () => {
                 className="block w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 appearance-none"
               >
                 <option>All Statuses</option>
-              
+
                 <option value="Waiting for Feedback">
                   Waiting for Feedback
                 </option>
@@ -749,6 +749,226 @@ const Applicants = () => {
                   </h5>
                   <div className="p-3 bg-gray-50 rounded-md">
                     <p>{detailsApplicant.remarks || "No remarks available"}</p>
+                  </div>
+                </div>
+
+                {/* Application Timeline */}
+                <div className="col-span-2 mt-4">
+                  <h5 className="text-sm font-medium text-gray-500 mb-2">
+                    Application Timeline
+                  </h5>
+                  <div className="border rounded-md p-4 bg-gray-50">
+                    <div className="space-y-4">
+                      {/* Timeline item for application submission */}
+                      {(() => {
+                        const timelineEvents = [];
+
+                        // Application Submitted
+                        timelineEvents.push({
+                          id: "submitted",
+                          title: "Application Submitted",
+                          date: detailsApplicant.created_at.split("T")[0],
+                          description: `Applied for ${detailsApplicant.jobtitle} position`,
+                          icon: (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 text-green-600"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          ),
+                          iconBg: "bg-green-100",
+                        });
+
+                        // Application Reviewed
+                        if (detailsApplicant.applicant_status !== "New") {
+                          timelineEvents.push({
+                            id: "reviewed",
+                            title: "Application Reviewed",
+                            date: "",
+                            description: `Status updated to ${detailsApplicant.applicant_status}`,
+                            remarks: detailsApplicant.remarks,
+                            icon: (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 text-blue-600"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ),
+                            iconBg: "bg-blue-100",
+                          });
+                        }
+
+                        // Interview phase
+                        if (
+                          [
+                            "For Interview",
+                            "Hired",
+                            "Waiting for Feedback",
+                          ].includes(detailsApplicant.applicant_status)
+                        ) {
+                          timelineEvents.push({
+                            id: "interview",
+                            title: "Interview Phase",
+                            date: "",
+                            description: "Candidate scheduled for interview",
+                            icon: (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 text-purple-600"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ),
+                            iconBg: "bg-purple-100",
+                          });
+                        }
+
+                        // Assessment phase
+                        if (
+                          ["For Assessment", "Hired"].includes(
+                            detailsApplicant.applicant_status
+                          )
+                        ) {
+                          timelineEvents.push({
+                            id: "assessment",
+                            title: "Assessment Phase",
+                            date: "",
+                            description: "Technical or skill assessment",
+                            icon: (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 text-yellow-600"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path
+                                  fillRule="evenodd"
+                                  d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            ),
+                            iconBg: "bg-yellow-100",
+                          });
+                        }
+
+                        // Final status
+                        if (
+                          ["Hired", "Rejected", "Decline"].includes(
+                            detailsApplicant.applicant_status
+                          )
+                        ) {
+                          timelineEvents.push({
+                            id: "final",
+                            title:
+                              detailsApplicant.applicant_status === "Hired"
+                                ? "Hired"
+                                : detailsApplicant.applicant_status ===
+                                  "Decline"
+                                ? "Candidate Declined"
+                                : "Application Rejected",
+                            date: "",
+                            description: "Final Decision",
+                            remarks: detailsApplicant.remarks,
+                            icon:
+                              detailsApplicant.applicant_status === "Hired" ? (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 text-green-600"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              ) : (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 text-red-600"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              ),
+                            iconBg:
+                              detailsApplicant.applicant_status === "Hired"
+                                ? "bg-green-100"
+                                : "bg-red-100",
+                          });
+                        }
+
+                        // Render all timeline events
+                        return timelineEvents.map((event, index) => {
+                          const isLastEvent =
+                            index === timelineEvents.length - 1;
+
+                          return (
+                            <div className="flex" key={event.id}>
+                              <div className="flex-none mr-3">
+                                <div
+                                  className={`w-8 h-8 ${event.iconBg} rounded-full flex items-center justify-center`}
+                                >
+                                  {event.icon}
+                                </div>
+
+                                {!isLastEvent && (
+                                  <div className="h-full border-l-2 border-gray-200 ml-4 mt-2"></div>
+                                )}
+                              </div>
+                              <div className={`${!isLastEvent ? "pb-5" : ""}`}>
+                                <p className="text-sm font-medium">
+                                  {event.title}
+                                </p>
+                                {event.date && (
+                                  <p className="text-xs text-gray-500">
+                                    {event.date}
+                                  </p>
+                                )}
+                                {event.description && (
+                                  <p className="text-sm mt-1 text-gray-600">
+                                    {event.description}
+                                  </p>
+                                )}
+                                {event.remarks && (
+                                  <p className="text-sm mt-1 text-gray-600">
+                                    {event.remarks}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
                   </div>
                 </div>
 

@@ -11,6 +11,11 @@ const ApplicantPortal = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const recaptchaRef = React.createRef();
   const [, setLoginSuccess] = useState(false);
+  const [toast, setToast] = useState({ visible: false, message: "", type: "" });
+
+  // Update the handleSubmit function to remove the success toast
+  // In the try block of the handleSubmit function, remove this line:
+  // showToast("Login successful!", "success");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,7 +24,7 @@ const ApplicantPortal = () => {
     try {
       const token = recaptchaRef.current.getValue();
       if (!token) {
-        alert("Please complete the reCAPTCHA challenge.");
+        showToast("Please complete the reCAPTCHA challenge.");
         setIsSubmitting(false);
         return;
       }
@@ -38,13 +43,89 @@ const ApplicantPortal = () => {
 
       // Set login success message
       setLoginSuccess(true);
+      // Success toast removed from here
     } catch (err) {
       console.error(err);
-      alert(err.response.data.message);
+      showToast(
+        err.response?.data?.message || "An error occurred. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const showToast = (message, type = "error") => {
+    setToast({ visible: true, message, type });
+
+    // Auto-hide toast after 5 seconds
+    setTimeout(() => {
+      setToast({ visible: false, message: "", type: "" });
+    }, 5000);
+  };
+
+  const ToastNotification = () => (
+    <div
+      className={`fixed top-4 right-4 transition-all duration-500 transform ${
+        toast.visible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+      }`}
+    >
+      <div
+        className={`rounded-lg shadow-lg px-6 py-4 ${
+          toast.type === "error"
+            ? "bg-red-600 text-white"
+            : toast.type === "success"
+            ? "bg-green-600 text-white"
+            : "bg-blue-600 text-white"
+        }`}
+      >
+        <div className="flex items-center space-x-3">
+          <div className="shrink-0">
+            {toast.type === "error" ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : toast.type === "success" ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </div>
+          <p className="font-medium">{toast.message}</p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 p-4">
@@ -178,13 +259,15 @@ const ApplicantPortal = () => {
               </div>
 
               {/* reCAPTCHA */}
-              <div className="my-4 overflow-x-auto">
-                <ReCAPTCHA
-                  sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
-                  ref={recaptchaRef}
-                  size="normal"
-                />
-              </div>
+              {!isLoggedIn && (
+                <div className="my-4 overflow-x-auto">
+                  <ReCAPTCHA
+                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                    ref={recaptchaRef}
+                    size="normal"
+                  />
+                </div>
+              )}
 
               {/* Submit Button */}
               <button
@@ -427,7 +510,6 @@ const ApplicantPortal = () => {
                   <h3 className="text-md font-semibold text-gray-700 mb-3 border-b pb-2">
                     Application Timeline
                   </h3>
-                  
 
                   <div className="space-y-3">
                     <div className="flex">
@@ -481,13 +563,12 @@ const ApplicantPortal = () => {
                     </div>
                   </div>
                 </div>
-
-               
               </div>
             </div>
           </div>
         )}
       </div>
+      <ToastNotification />
     </div>
   );
 };
