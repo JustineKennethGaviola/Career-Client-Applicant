@@ -15,6 +15,7 @@ const Applicants = () => {
     status: "All Statuses",
     dateApplied: "All Dates",
   });
+  const [url, setUrl] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -103,6 +104,13 @@ const Applicants = () => {
 
     fetchJobData();
   }, [navigate]);
+  useEffect(() => {
+    if (detailsApplicant?.resume) {
+      const baseUrl = import.meta.env.VITE_URL; // Access VITE_URL from .env
+      setUrl(`${baseUrl}/uploads/${detailsApplicant.resume}`);
+    }
+  }, [detailsApplicant]);
+
 
   // Status badge styles
   const getStatusBadgeClasses = (statusType) => {
@@ -124,7 +132,7 @@ const Applicants = () => {
     try {
       // Implement for the actual backend - this is a placeholder
       const response = await axiosInstance.get(
-        `/download-resume/${applicantId}`,
+        url,
         {
           responseType: "blob",
         }
@@ -999,9 +1007,10 @@ const Applicants = () => {
                 </div>
                         
                 <div className="flex-grow h-[60vh] border rounded-lg overflow-hidden">
-                  {detailsApplicant.resume_url ? (
+                  
+                  {url ? (
                     <iframe
-                      src={detailsApplicant.resume_url}
+                      src={url}
                       className="w-full h-full"
                       title={`${detailsApplicant.firstname}'s Resume`}
                     />
@@ -1040,29 +1049,7 @@ const Applicants = () => {
                   )}
                 </div>
 
-                <div className="mt-4 flex justify-between">
-                  <span className="text-sm text-gray-500">
-                    {detailsApplicant.resume_filename || "resume.pdf"}
-                  </span>
-                  <button
-                    className="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 flex items-center"
-                    onClick={() => downloadResume(detailsApplicant.id)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 mr-1"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Download
-                  </button>
-                </div>
+                
               </div>
             )}
           </div>
