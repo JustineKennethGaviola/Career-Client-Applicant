@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import CompanyLogo from "./../assets/RCCLogo-White.png"
 
 const Sidebar = () => {
   return (
@@ -7,7 +8,7 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="py-6 px-4 flex items-center justify-center">
         <img
-          src="/src/assets/RCCLogo-White.png"
+          src={CompanyLogo}
           alt="RCC Logo"
           className="h-12"
         />

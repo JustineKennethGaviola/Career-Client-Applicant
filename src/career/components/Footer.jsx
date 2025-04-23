@@ -74,19 +74,19 @@ const Footer = () => {
           </p>
           <ul className="text-md">
             <li className="leading-8 hover:text-cyan-500 cursor-pointer transition-all duration-200">
-              <Link to="/">Home</Link>
+              <Link to="https://rcccolabsolutions.com">Home</Link>
             </li>
             <li className="leading-8 hover:text-cyan-500 cursor-pointer transition-all duration-200">
-              <Link to="/about">About Us</Link>
+              <Link to="https://rcccolabsolutions.com/aboutus">About Us</Link>
             </li>
             <li className="leading-8 hover:text-cyan-500 cursor-pointer transition-all duration-200">
-              <Link to="/services">Services</Link>
+              <Link to="https://rcccolabsolutions.com/services">Services</Link>
             </li>
             <li className="leading-8 hover:text-cyan-500 cursor-pointer transition-all duration-200">
               <Link to="/careers">Careers</Link>
             </li>
             <li className="leading-8 hover:text-cyan-500 cursor-pointer transition-all duration-200">
-              <Link to="/contact">Contact Us</Link>
+              <Link to="https://rcccolabsolutions.com/contactus">Contact Us</Link>
             </li>
             <li className="lg:hidden block leading-8 hover:text-emerald-500 cursor-pointer transition-all duration-200">
               <Link to="/terms">Terms of Use</Link>

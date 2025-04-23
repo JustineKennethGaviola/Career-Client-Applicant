@@ -716,7 +716,7 @@ const Applicants = () => {
 
                   <div>
                     <h5 className="text-sm font-medium text-gray-500">Phone</h5>
-                    <p>{detailsApplicant.phonenumber || "Not provided"}</p>
+                    <p>{detailsApplicant.contact_number || "Not provided"}</p>
                   </div>
                 </div>
 
@@ -728,29 +728,9 @@ const Applicants = () => {
                     <p>{detailsApplicant.address || "Not provided"}</p>
                   </div>
 
-                  <div>
-                    <h5 className="text-sm font-medium text-gray-500">
-                      Expected Salary
-                    </h5>
-                    <p>{detailsApplicant.expectedsalary || "Not specified"}</p>
-                  </div>
-
-                  <div>
-                    <h5 className="text-sm font-medium text-gray-500">
-                      Notice Period
-                    </h5>
-                    <p>{detailsApplicant.noticeperiod || "Not specified"}</p>
-                  </div>
                 </div>
 
-                <div className="col-span-2">
-                  <h5 className="text-sm font-medium text-gray-500 mb-2">
-                    Remarks
-                  </h5>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    <p>{detailsApplicant.remarks || "No remarks available"}</p>
-                  </div>
-                </div>
+                
 
                 {/* Application Timeline */}
                 <div className="col-span-2 mt-4">
@@ -1017,7 +997,7 @@ const Applicants = () => {
                     Back to Details
                   </button>
                 </div>
-
+                        
                 <div className="flex-grow h-[60vh] border rounded-lg overflow-hidden">
                   {detailsApplicant.resume_url ? (
                     <iframe

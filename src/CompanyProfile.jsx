@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import axiosInstance from "./api/tokenizedaxios";
+
 const CompanyProfile = () => {
     const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState(null); // State to store the response data
@@ -30,7 +31,7 @@ const CompanyProfile = () => {
           navigate('/client/login');
         } else {
           const data = response.data.companydata;
-         
+          console.log(data);
          
           setCompanyInfo({
             companyName: data.company_name,

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import CompanyLogo from "./../../assets/RCCLogo-Blue.png"; // Adjust the path as necessary
 
 const Header = () => {
   return (
@@ -9,7 +10,8 @@ const Header = () => {
         <div className="absolute -left-16 top-1/2 transform -translate-y-1/2">
           <Link to="/" className="flex items-center">
             <img
-              src="/src/assets/RCCLogo-Blue.png"
+              src={CompanyLogo}
+             
               alt="RCC Colab Solutions"
               className="h-16 w-30"
             />
@@ -24,31 +26,31 @@ const Header = () => {
           <nav className="hidden md:flex items-center">
             <div className="flex space-x-8">
               <Link
-                to="/"
+                to="https://rcccolabsolutions.com"
                 className="py-2 text-gray-700 hover:text-[#0A2472] font-medium border-b-2 border-transparent hover:border-[#0A2472] transition-colors duration-200"
               >
                 Home
               </Link>
               <Link
-                to="/about"
+                to="https://rcccolabsolutions.com/aboutus"
                 className="py-2 text-gray-700 hover:text-[#0A2472] font-medium border-b-2 border-transparent hover:border-[#0A2472] transition-colors duration-200"
               >
                 About Us
               </Link>
               <Link
-                to="/services"
+                to="https://rcccolabsolutions.com/services"
                 className="py-2 text-gray-700 hover:text-[#0A2472] font-medium border-b-2 border-transparent hover:border-[#0A2472] transition-colors duration-200"
               >
                 Services
               </Link>
               <Link
-                to="/career"
+                to="https://rcccolabsolutions.com/services/careerJob"
                 className="py-2 text-gray-700 hover:text-[#0A2472] font-medium border-b-2 border-transparent hover:border-[#0A2472] transition-colors duration-200"
               >
                 Careers
               </Link>
               <Link
-                to="/contact"
+                to="https://rcccolabsolutions.com/contactus"
                 className="ml-2 bg-gradient-to-tr from-cyan-600 to-cyan-400 text-white px-5 py-2 rounded-lg hover:from-blue-700 hover:to-blue-900 font-medium transition-colors duration-200"
               >
                 Contact Us
