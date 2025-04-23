@@ -6,15 +6,107 @@ import Footer from "./components/Footer";
 import ReCAPTCHA from "react-google-recaptcha";
 import axiosInstance from "./../api/axios";
 
+// Toast component
+const Toast = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className="fixed top-4 right-4 transition-all duration-500 transform z-50">
+      <div
+        className={`rounded-lg shadow-lg px-6 py-4 ${
+          type === "error"
+            ? "bg-red-600 text-white"
+            : type === "success"
+            ? "bg-green-600 text-white"
+            : "bg-blue-600 text-white"
+        }`}
+      >
+        <div className="flex items-center space-x-3">
+          <div className="shrink-0">
+            {type === "error" ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : type === "success" ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+          </div>
+          <p className="font-medium">{message}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Career = () => {
   const recaptchaRef = React.createRef();
   const navigate = useNavigate();
   const [recaptchaValue, setRecaptchaValue] = useState(null);
   const location = useLocation();
-  const jobId = location.state?.jobId; // Assuming jobId is passed via navigate
+  const jobId = location.state?.jobId;
   const [jobData, setJobData] = useState(null);
   const [error, setError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  const showToast = (message, type = "success") => {
+    setToast({
+      show: true,
+      message,
+      type,
+    });
+  };
+
+  const hideToast = () => {
+    setToast((prev) => ({
+      ...prev,
+      show: false,
+    }));
+  };
 
   useEffect(() => {
     const fetchJobPostSpecific = async () => {
@@ -106,12 +198,12 @@ const Career = () => {
 
     const token = recaptchaRef.current.getValue();
     if (!token) {
-      alert("Please complete the reCAPTCHA challenge.");
+      showToast("Please complete the reCAPTCHA challenge.", "error");
       return;
     }
 
     if (!cvFile) {
-      alert("Please upload your CV.");
+      showToast("Please upload your CV.", "error");
       return;
     }
 
@@ -154,15 +246,21 @@ const Career = () => {
       );
 
       if (applicationResponse.data.status === "success") {
-        alert(
-          `Application submitted successfully! Your reference code is: ${applicationResponse.data.data.reference_code}`
+        const referenceCode = applicationResponse.data.data.reference_code;
+
+        // Show success toast with reference code
+        showToast(
+          `Application submitted successfully! Your reference code is: ${referenceCode}`,
+          "success"
         );
 
-        navigate("/", {
-          state: {
-            referenceCode: applicationResponse.data.data.reference_code,
-          },
-        });
+        setTimeout(() => {
+          navigate("/", {
+            state: {
+              referenceCode: referenceCode,
+            },
+          });
+        }, 6000);
       }
     } catch (error) {
       console.error("Error submitting application:", error);
@@ -174,17 +272,19 @@ const Career = () => {
           const errorMessages = Object.values(error.response.data.errors)
             .flat()
             .join("\n");
-          alert(`Validation errors:\n${errorMessages}`);
+          showToast(`Validation errors: ${errorMessages}`, "error");
         } else if (error.response.data.message) {
-          alert(`Error: ${error.response.data.message}`);
+          showToast(`Error: ${error.response.data.message}`, "error");
         } else {
-          alert(
-            "An error occurred while submitting your application. Please try again later."
+          showToast(
+            "An error occurred while submitting your application. Please try again later.",
+            "error"
           );
         }
       } else {
-        alert(
-          "An error occurred while submitting your application. Please try again later."
+        showToast(
+          "An error occurred while submitting your application. Please try again later.",
+          "error"
         );
       }
     }
@@ -197,6 +297,12 @@ const Career = () => {
   return (
     <div className="bg-white">
       <Header />
+
+      {/* Toast notification */}
+      {toast.show && (
+        <Toast message={toast.message} type={toast.type} onClose={hideToast} />
+      )}
+
       {/* Hero Section with Job Title and Summary */}
       <div
         className="relative bg-[#0A2472] overflow-hidden"
