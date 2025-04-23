@@ -111,7 +111,6 @@ const Applicants = () => {
     }
   }, [detailsApplicant]);
 
-
   // Status badge styles
   const getStatusBadgeClasses = (statusType) => {
     switch (statusType) {
@@ -131,12 +130,9 @@ const Applicants = () => {
   const downloadResume = async (applicantId) => {
     try {
       // Implement for the actual backend - this is a placeholder
-      const response = await axiosInstance.get(
-        url,
-        {
-          responseType: "blob",
-        }
-      );
+      const response = await axiosInstance.get(url, {
+        responseType: "blob",
+      });
 
       // Create a download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -735,10 +731,7 @@ const Applicants = () => {
                     </h5>
                     <p>{detailsApplicant.address || "Not provided"}</p>
                   </div>
-
                 </div>
-
-                
 
                 {/* Application Timeline */}
                 <div className="col-span-2 mt-4">
@@ -797,120 +790,6 @@ const Applicants = () => {
                               </svg>
                             ),
                             iconBg: "bg-blue-100",
-                          });
-                        }
-
-                        // Interview phase
-                        if (
-                          [
-                            "For Interview",
-                            "Hired",
-                            "Waiting for Feedback",
-                          ].includes(detailsApplicant.applicant_status)
-                        ) {
-                          timelineEvents.push({
-                            id: "interview",
-                            title: "Interview Phase",
-                            date: "",
-                            description: "Candidate scheduled for interview",
-                            icon: (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 text-purple-600"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            ),
-                            iconBg: "bg-purple-100",
-                          });
-                        }
-
-                        // Assessment phase
-                        if (
-                          ["For Assessment", "Hired"].includes(
-                            detailsApplicant.applicant_status
-                          )
-                        ) {
-                          timelineEvents.push({
-                            id: "assessment",
-                            title: "Assessment Phase",
-                            date: "",
-                            description: "Technical or skill assessment",
-                            icon: (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 text-yellow-600"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                                <path
-                                  fillRule="evenodd"
-                                  d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            ),
-                            iconBg: "bg-yellow-100",
-                          });
-                        }
-
-                        // Final status
-                        if (
-                          ["Hired", "Rejected", "Decline"].includes(
-                            detailsApplicant.applicant_status
-                          )
-                        ) {
-                          timelineEvents.push({
-                            id: "final",
-                            title:
-                              detailsApplicant.applicant_status === "Hired"
-                                ? "Hired"
-                                : detailsApplicant.applicant_status ===
-                                  "Decline"
-                                ? "Candidate Declined"
-                                : "Application Rejected",
-                            date: "",
-                            description: "Final Decision",
-                            remarks: detailsApplicant.remarks,
-                            icon:
-                              detailsApplicant.applicant_status === "Hired" ? (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-4 w-4 text-green-600"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              ) : (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-4 w-4 text-red-600"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
-                                >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              ),
-                            iconBg:
-                              detailsApplicant.applicant_status === "Hired"
-                                ? "bg-green-100"
-                                : "bg-red-100",
                           });
                         }
 
@@ -1005,9 +884,8 @@ const Applicants = () => {
                     Back to Details
                   </button>
                 </div>
-                        
+
                 <div className="flex-grow h-[60vh] border rounded-lg overflow-hidden">
-                  
                   {url ? (
                     <iframe
                       src={url}
@@ -1048,8 +926,6 @@ const Applicants = () => {
                     </div>
                   )}
                 </div>
-
-                
               </div>
             )}
           </div>
