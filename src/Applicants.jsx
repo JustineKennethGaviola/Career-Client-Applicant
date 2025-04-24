@@ -24,6 +24,8 @@ const Applicants = () => {
   const [newStatus, setNewStatus] = useState("");
   const [remarks, setRemarks] = useState("");
   const [jobs, setJobs] = useState([]);
+  const [statuses, setStatuses] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const filteredApplicants = applicants.filter((applicant) => {
     // Search term filter
     const searchMatch =
@@ -58,9 +60,28 @@ const Applicants = () => {
     setOpenDropdown(null);
   };
 
-  const handleRowClick = (applicant) => {
-    handleOpenDetailsModal(applicant);
+  const handleRowClick = async (applicant) => {
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.post("/getapplicantstatus", {
+        applicant_id: applicant.id,
+        priority_job_id: applicant.priority_job_id,
+      });
+  
+      if (response.data.status_tokenized === "error") {
+        localStorage.clear();
+        navigate("/client/login");
+      } else {
+        setStatuses(response.data.data);
+      }
+    } catch (err) {
+      console.error("Error fetching status:", err);
+    } finally {
+      setIsLoading(false);
+      handleOpenDetailsModal(applicant);
+    }
   };
+  
 
   // Fetch data from the database
   useEffect(() => {
@@ -755,106 +776,55 @@ const Applicants = () => {
                   <h5 className="text-sm font-medium text-gray-500 mb-2">
                     Application Timeline
                   </h5>
-                  <div className="border rounded-md p-4 bg-gray-50">
+                  <div className="border rounded-md p-4 bg-gray-50 h-60 overflow-y-auto">
                     <div className="space-y-4">
-                      {/* Timeline item for application submission */}
-                      {(() => {
-                        const timelineEvents = [];
+                      {statuses.map((status, index) => {
+                        const isLastEvent = index === statuses.length - 1;
 
-                        // Application Submitted
-                        timelineEvents.push({
-                          id: "submitted",
-                          title: "Application Submitted",
-                          date: detailsApplicant.created_at.split("T")[0],
-                          description: `Applied for ${detailsApplicant.jobtitle} position`,
-                          icon: (
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4 text-green-600"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          ),
-                          iconBg: "bg-green-100",
-                        });
-
-                        // Application Reviewed
-                        if (detailsApplicant.applicant_status !== "New") {
-                          timelineEvents.push({
-                            id: "reviewed",
-                            title: "Application Reviewed",
-                            date: "",
-                            description: `Status updated to ${detailsApplicant.applicant_status}`,
-                            remarks: detailsApplicant.remarks,
-                            icon: (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4 text-blue-600"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
+                        return (
+                          <div className="flex" key={status.id || index}>
+                            <div className="flex-none mr-3">
+                              <div
+                                className={`w-8 h-8 ${status.iconBg || "bg-gray-200"} rounded-full flex items-center justify-center`}
                               >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            ),
-                            iconBg: "bg-blue-100",
-                          });
-                        }
-
-                        // Render all timeline events
-                        return timelineEvents.map((event, index) => {
-                          const isLastEvent =
-                            index === timelineEvents.length - 1;
-
-                          return (
-                            <div className="flex" key={event.id}>
-                              <div className="flex-none mr-3">
-                                <div
-                                  className={`w-8 h-8 ${event.iconBg} rounded-full flex items-center justify-center`}
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-4 w-4 text-blue-600"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
                                 >
-                                  {event.icon}
-                                </div>
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </div>
 
-                                {!isLastEvent && (
-                                  <div className="h-full border-l-2 border-gray-200 ml-4 mt-2"></div>
-                                )}
-                              </div>
-                              <div className={`${!isLastEvent ? "pb-5" : ""}`}>
-                                <p className="text-sm font-medium">
-                                  {event.title}
-                                </p>
-                                {event.date && (
-                                  <p className="text-xs text-gray-500">
-                                    {event.date}
-                                  </p>
-                                )}
-                                {event.description && (
-                                  <p className="text-sm mt-1 text-gray-600">
-                                    {event.description}
-                                  </p>
-                                )}
-                                {event.remarks && (
-                                  <p className="text-sm mt-1 text-gray-600">
-                                    {event.remarks}
-                                  </p>
-                                )}
-                              </div>
+                              {!isLastEvent && (
+                                <div className="h-full border-l-2 border-gray-200 ml-4 mt-2"></div>
+                              )}
                             </div>
-                          );
-                        });
-                      })()}
+                            <div className={`${!isLastEvent ? "pb-5" : ""}`}>
+                              <p className="text-sm font-medium">{status.status}</p>
+                              <p className="text-xs mt-1 text-gray-600">Update Status</p>
+                              {status.remarks && (
+                                <p className="text-sm mt-1 text-gray-600">{status.remarks}</p>
+                              )}
+                              {status.date && (
+                                <p className="text-xs text-gray-500">{status.date}</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
+
+
+                
+
 
                 <div className="col-span-2 border-t pt-4">
                   <div className="flex justify-end space-x-3">
@@ -904,8 +874,8 @@ const Applicants = () => {
 
                 <div className="flex-grow h-[60vh] border rounded-lg overflow-hidden">
                   {url ? (
-                    <iframe
-                      src={url}
+                    <object
+                      data={url}
                       className="w-full h-full"
                       title={`${detailsApplicant.firstname}'s Resume`}
                     />
