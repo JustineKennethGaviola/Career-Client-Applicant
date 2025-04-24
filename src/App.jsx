@@ -7,11 +7,13 @@ import Applicants from "./Applicants";
 import CompanyProfile from "./CompanyProfile";
 import CareerJob from "./career/CareerJob";
 import Career from "./career/Career";
+import ReviewLogo from "./assets/Review.png";
+import StatusLogo from "./assets/Status.png";
 
 const Dashboard = React.lazy(() => import("./Dashboard"));
 
 import ApplicantPortal from "./applicant/ApplicantPortal";
-import logoBlue from "./assets/RCCLogo-Blue.png";
+import logoBlue from "./assets/RCCLogo-White.png";
 import useAutoLogout from "./hooks/useAutoLogout";
 import DisableConsole from "./hooks/DisableConsole";
 
@@ -46,34 +48,27 @@ const ApplicantLayout = ({ children }) => {
 // Landing page component
 const LandingPage = () => (
   <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
-    <header className="bg-white shadow-sm p-4">
+    <header className="bg-[#0A2472] shadow-sm p-4">
       <div className="container mx-auto flex items-center">
         <img
           src={logoBlue}
           alt="RCC Colab Solutions"
-          className="h-10 w-10 mr-3"
+          className="h-16 w-15 mr-3"
         />
-        <h1 className="text-xl font-semibold text-gray-800">
-          RCC Colab Solutions
-        </h1>
+        <h1 className="text-xl font-bold text-white">RCC Colab Solutions</h1>
       </div>
     </header>
 
     <main className="flex-1 flex flex-col items-center justify-center p-6">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">
-          Welcome to our Portal
-        </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Access our platform to manage your recruitment needs or track your
-          application status.
-        </p>
-      </div>
-
       <div className="flex flex-col md:flex-row gap-6 w-full max-w-3xl">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden flex-1 transition-transform hover:transform hover:scale-105">
-          <div className="bg-blue-600 h-2"></div>
+          <div className="bg-[#0A2472] h-2"></div>
           <div className="p-6">
+            <img
+              src={ReviewLogo}
+              alt="Client Review Portal"
+              className="w-full h-32 object-contain mb-4"
+            />
             <h3 className="text-xl font-semibold text-gray-800 mb-3">
               Client Portal
             </h3>
@@ -83,7 +78,7 @@ const LandingPage = () => (
             </p>
             <a
               href="/client/login"
-              className="block w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-center transition-colors"
+              className="block w-full py-3 px-4 bg-[#0A2472] hover:bg-[#0A2472] text-white font-medium rounded-lg text-center transition-colors"
             >
               Client Login
             </a>
@@ -91,8 +86,13 @@ const LandingPage = () => (
         </div>
 
         <div className="bg-white rounded-xl shadow-lg overflow-hidden flex-1 transition-transform hover:transform hover:scale-105">
-          <div className="bg-green-600 h-2"></div>
+          <div className="bg-[#FB923C] h-2"></div>
           <div className="p-6">
+            <img
+              src={StatusLogo}
+              alt="Client Review Portal"
+              className="w-full h-32 object-contain mb-4"
+            />
             <h3 className="text-xl font-semibold text-gray-800 mb-3">
               Applicant Portal
             </h3>
@@ -102,7 +102,7 @@ const LandingPage = () => (
             </p>
             <a
               href="/applicant/portal"
-              className="block w-full py-3 px-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg text-center transition-colors"
+              className="block w-full py-3 px-4 bg-[#FB923C] hover:bg-[#FB923C] text-white font-medium rounded-lg text-center transition-colors"
             >
               Applicant Login
             </a>
@@ -111,17 +111,17 @@ const LandingPage = () => (
       </div>
     </main>
 
-    <footer className="bg-white shadow-inner p-6">
-      <div className="container mx-auto text-center text-gray-500">
+    <footer className="bg-[#0A2472] shadow-inner p-6">
+      <div className="container mx-auto text-center text-white">
         <p>© 2024 RCC Colab Solutions. All rights reserved.</p>
         <div className="flex justify-center mt-3 space-x-4">
-          <a href="#" className="text-gray-400 hover:text-gray-600">
+          <a href="#" className="text-white hover:text-gray-600">
             Privacy Policy
           </a>
-          <a href="#" className="text-gray-400 hover:text-gray-600">
+          <a href="#" className="text-white hover:text-gray-600">
             Terms of Service
           </a>
-          <a href="#" className="text-gray-400 hover:text-gray-600">
+          <a href="#" className="text-white hover:text-gray-600">
             Contact Us
           </a>
         </div>

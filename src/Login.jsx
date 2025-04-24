@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "./api/axios";
 import ReCAPTCHA from "react-google-recaptcha";
-import CompanyLogo from "./assets/RCCLogo-Blue.png"; // Adjust the path as necessary
+import CompanyLogo from "./assets/RCCLogo-Blue.png";
 
 // Toast component
 const Toast = ({ message, type, onClose }) => {
@@ -174,11 +174,7 @@ const Login = () => {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="mb-8">
-            <img
-              src={CompanyLogo}
-              alt="RCC Logo"
-              className="h-16"
-            />
+            <img src={CompanyLogo} alt="RCC Logo" className="h-16" />
           </div>
 
           {/* Login Form */}
