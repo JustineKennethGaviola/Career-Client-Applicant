@@ -603,7 +603,7 @@ const Applicants = () => {
               </button>
             </div>
 
-            <div className="mb-6">
+            <div className="mb-4">
               <input
                 type="hidden"
                 name="id"
@@ -634,6 +634,16 @@ const Applicants = () => {
                 <option value="Rejected">Rejected</option>
                 <option value="Decline">Decline</option>
               </select>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Remarks</label>
+              <textarea
+                value={remarks}
+                onChange={handleRemarksChange}
+                placeholder="Add comments or notes about this status change..."
+                className="block w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 h-24"
+              ></textarea>
             </div>
 
             <div className="flex justify-end gap-2">
