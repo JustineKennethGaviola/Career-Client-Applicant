@@ -114,14 +114,24 @@ const Applicants = () => {
   // Status badge styles
   const getStatusBadgeClasses = (statusType) => {
     switch (statusType) {
-      case "Waiting for Job Offer":
-        return "bg-green-100 text-green-800";
-      case "Rejected":
-        return "bg-red-100 text-red-800";
       case "New":
         return "bg-blue-100 text-blue-800";
       case "Shortlisted":
         return "bg-yellow-100 text-yellow-800";
+      case "For Interview":
+        return "bg-purple-100 text-purple-800";
+      case "For Assessment":
+        return "bg-indigo-100 text-indigo-800";
+      case "Waiting for Feedback":
+        return "bg-orange-100 text-orange-800";
+      case "Waiting for Job Offer":
+        return "bg-green-100 text-green-800";
+      case "Hired":
+        return "bg-emerald-100 text-emerald-800";
+      case "Rejected":
+        return "bg-red-100 text-red-800";
+      case "Decline":
+        return "bg-gray-100 text-gray-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -277,16 +287,19 @@ const Applicants = () => {
                 className="block w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 appearance-none"
               >
                 <option>All Statuses</option>
-
+                <option value="New">New</option>
+                <option value="Shortlisted">Shortlisted</option>
+                <option value="For Interview">For Interview</option>
+                <option value="For Assessment">For Assessment</option>
                 <option value="Waiting for Feedback">
                   Waiting for Feedback
                 </option>
-
-                <option value="For Interview">For Interview</option>
-                <option value="For Assessment">For Assessment</option>
-                <option value="Decline">Decline</option>
-                <option value="Rejected">Rejected</option>
+                <option value="Waiting for Job Offer">
+                  Waiting for Job Offer
+                </option>
                 <option value="Hired">Hired</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Decline">Decline</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                 <svg
@@ -607,26 +620,20 @@ const Applicants = () => {
                 <option value="" selected disabled>
                   Select Status
                 </option>
+                <option value="New">New</option>
+                <option value="Shortlisted">Shortlisted</option>
+                <option value="For Interview">For Interview</option>
+                <option value="For Assessment">For Assessment</option>
                 <option value="Waiting for Feedback">
                   Waiting for Feedback
                 </option>
-
-                <option value="For Interview">For Interview</option>
-                <option value="For Assessment">For Assessment</option>
-                <option value="Decline">Decline</option>
-                <option value="Rejected">Rejected</option>
+                <option value="Waiting for Job Offer">
+                  Waiting for Job Offer
+                </option>
                 <option value="Hired">Hired</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Decline">Decline</option>
               </select>
-            </div>
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-1">Remarks</label>
-              <textarea
-                name="remarks"
-                value={remarks} // Controlled value
-                onChange={handleRemarksChange} // Handling the change
-                className="w-full border border-gray-300 rounded-md p-2 h-20"
-                placeholder="Type your remarks here..."
-              ></textarea>
             </div>
 
             <div className="flex justify-end gap-2">

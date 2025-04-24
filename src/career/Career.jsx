@@ -109,9 +109,9 @@ const Career = () => {
   };
 
   useEffect(() => {
-    const fetchJobPostSpecific = async () => {
+    const fetchJobPostSpecific = async (id) => {
       try {
-        const response = await axiosInstance.get("/getjob/" + jobId);
+        const response = await axiosInstance.get("/getjob/" + id);
         if (response.data.status_tokenized === "error") {
           localStorage.clear();
           navigate("/client/login");
@@ -124,9 +124,13 @@ const Career = () => {
         setError("Error fetching data");
       }
     };
-
-    if (jobId) {
-      fetchJobPostSpecific();
+  
+    const params = new URLSearchParams(window.location.search);
+    const jobIdFromParams = params.get('job');
+    const jobIdToUse = jobId || jobIdFromParams;
+    
+    if (jobIdToUse) {
+      fetchJobPostSpecific(jobIdToUse);
     }
   }, [jobId, navigate]);
 
