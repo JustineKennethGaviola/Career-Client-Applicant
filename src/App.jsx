@@ -47,7 +47,6 @@ const ApplicantLayout = ({ children }) => {
 };
 
 // Landing page component
-// Landing page component
 const LandingPage = () => (
   <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
     <header className="bg-[#0A2472] shadow-sm p-4">
@@ -63,7 +62,7 @@ const LandingPage = () => (
 
     <main className="flex-1 flex flex-col items-center justify-center p-6">
       <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl">
-        {/* Enhanced Client Portal Card */}
+        {/* Client Portal Card */}
         <div className="bg-white rounded-xl shadow-xl overflow-hidden flex-1 transition-all duration-300 hover:shadow-2xl hover:translate-y-[-8px] group">
           <div className="h-2 bg-[#0A2472]"></div>
           <div className="relative overflow-hidden h-48">
@@ -107,7 +106,7 @@ const LandingPage = () => (
           </div>
         </div>
 
-        {/* Enhanced Applicant Portal Card */}
+        {/* Applicant Portal Card */}
         <div className="bg-white rounded-xl shadow-xl overflow-hidden flex-1 transition-all duration-300 hover:shadow-2xl hover:translate-y-[-8px] group">
           <div className="h-2 bg-[#FB923C]"></div>
           <div className="relative overflow-hidden h-48">
@@ -151,7 +150,7 @@ const LandingPage = () => (
           </div>
         </div>
 
-        {/* Enhanced Career Portal Card */}
+        {/* Career Portal Card */}
         <div className="bg-white rounded-xl shadow-xl overflow-hidden flex-1 transition-all duration-300 hover:shadow-2xl hover:translate-y-[-8px] group">
           <div className="h-2 bg-[#0A2472]"></div>
           <div className="relative overflow-hidden h-48">
