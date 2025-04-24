@@ -455,16 +455,6 @@ const Applicants = () => {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                          }}
-                        >
-                          Returned
-                        </a>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
                             handleOpenStatusModal(applicant);
                           }}
                         >
