@@ -82,6 +82,7 @@ const Login = () => {
   const [isRobotChecked, setIsRobotChecked] = useState(false);
   const [error, setError] = useState("");
   const recaptchaRef = React.createRef();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Toast state
   const [toast, setToast] = useState({
@@ -109,10 +110,13 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsProcessing(true); // Set processing state to true when form is submitted
+
     try {
       const token = recaptchaRef.current.getValue();
       if (!token) {
         showToast("Please complete the reCAPTCHA challenge.", "error");
+        setIsProcessing(false); // Reset processing state
         return;
       }
 
@@ -159,6 +163,8 @@ const Login = () => {
         // Other errors
         showToast("An unexpected error occurred. Please try again.", "error");
       }
+
+      setIsProcessing(false); // Reset processing state on error
     }
   };
 
@@ -240,9 +246,40 @@ const Login = () => {
             <div className="flex justify-center mt-8">
               <button
                 type="submit"
-                className="w-60 bg-[#0A2472] hover:bg-blue-950 text-white font-medium py-3 px-4 rounded-2xl transition duration-300"
+                disabled={isProcessing}
+                className={`w-60 font-medium py-3 px-4 rounded-2xl transition duration-300 ${
+                  isProcessing
+                    ? "bg-blue-900 cursor-not-allowed"
+                    : "bg-[#0A2472] hover:bg-blue-950 text-white"
+                }`}
               >
-                Submit
+                {isProcessing ? (
+                  <div className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Processing...
+                  </div>
+                ) : (
+                  "Submit"
+                )}
               </button>
             </div>
           </form>
