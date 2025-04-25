@@ -138,12 +138,30 @@ const Applicants = () => {
 
     fetchJobData();
   }, [navigate]);
+
   useEffect(() => {
-    if (detailsApplicant?.resume) {
-      const baseUrl = import.meta.env.VITE_URL;
-      setUrl(`${baseUrl}/uploads/${detailsApplicant.resume}`);
+    if (detailsApplicant?.id) {
+      const fetchResumeUrl = async () => {
+        try {
+          const response = await axiosInstance.get(
+            `/view-resume/${detailsApplicant.id}`
+          );
+  
+          if (response.data.status_tokenized === "error") {
+            localStorage.clear();
+            navigate("/client/login");
+          } else {
+            setUrl(response.data.url);
+            console.log("Fetched resume URL:", response.data);
+          }
+        } catch (err) {
+          console.error("Error fetching resume URL:", err);
+        }
+      };
+  
+      fetchResumeUrl(); // <- move this inside the if block
     }
-  }, [detailsApplicant]);
+  }, [detailsApplicant?.id, navigate]);
 
   // Status badge styles
   const getStatusBadgeClasses = (statusType) => {
@@ -933,8 +951,8 @@ const Applicants = () => {
 
                 <div className="flex-grow h-[60vh] border rounded-lg overflow-hidden">
                   {url ? (
-                    <object
-                      data={url}
+                    <iframe
+                      src={url}
                       className="w-full h-full"
                       title={`${detailsApplicant.firstname}'s Resume`}
                     />

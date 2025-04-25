@@ -143,21 +143,6 @@ const CompanyProfile = () => {
               </p>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Add BCC</label>
-              <input
-                type="text"
-                name="bcc"
-                value={companyInfo.bcc}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md p-2"
-                placeholder="Enter email addresses"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Use comma (,) if more than one email
-              </p>
-            </div>
-
             <div className="flex justify-center">
               <button
                 onClick={() => handleSubmit("email")}
