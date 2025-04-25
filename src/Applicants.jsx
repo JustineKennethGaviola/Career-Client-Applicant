@@ -10,6 +10,7 @@ const Applicants = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [resumeView, setResumeView] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [filters, setFilters] = useState({
     position: "All Positions",
     status: "All Statuses",
@@ -235,6 +236,8 @@ const Applicants = () => {
   };
 
   const handleStatusUpdate = async (e) => {
+    setIsUpdatingStatus(true);
+
     try {
       const updateapplicantresponse = await axiosInstance.post(
         "/updateapplicant",
@@ -268,6 +271,8 @@ const Applicants = () => {
     } catch (error) {
       console.error("Error updating status:", error);
       showToast("Failed to update status. Please try again.", "error");
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -697,9 +702,36 @@ const Applicants = () => {
               </button>
               <button
                 onClick={handleStatusUpdate}
-                className="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800"
+                disabled={isUpdatingStatus}
+                className="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800 disabled:bg-blue-400 flex items-center justify-center"
               >
-                Update Status
+                {isUpdatingStatus ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Updating...
+                  </>
+                ) : (
+                  "Update Status"
+                )}
               </button>
             </div>
           </div>

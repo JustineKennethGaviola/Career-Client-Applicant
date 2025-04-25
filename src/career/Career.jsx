@@ -86,6 +86,7 @@ const Career = () => {
   const [jobData, setJobData] = useState(null);
   const [error, setError] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [toast, setToast] = useState({
     show: false,
@@ -124,11 +125,11 @@ const Career = () => {
         setError("Error fetching data");
       }
     };
-  
+
     const params = new URLSearchParams(window.location.search);
-    const jobIdFromParams = params.get('job');
+    const jobIdFromParams = params.get("job");
     const jobIdToUse = jobId || jobIdFromParams;
-    
+
     if (jobIdToUse) {
       fetchJobPostSpecific(jobIdToUse);
     }
@@ -199,15 +200,18 @@ const Career = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     const token = recaptchaRef.current.getValue();
     if (!token) {
       showToast("Please complete the reCAPTCHA challenge.", "error");
+      setIsSubmitting(false);
       return;
     }
 
     if (!cvFile) {
       showToast("Please upload your CV.", "error");
+      setIsSubmitting(false);
       return;
     }
 
@@ -291,6 +295,8 @@ const Career = () => {
           "error"
         );
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -742,9 +748,36 @@ const Career = () => {
           <div className="flex justify-center">
             <button
               type="submit"
-              className="w-full md:w-[697px] py-3 bg-orange-500 text-white rounded-md text-lg font-semibold hover:bg-orange-600 transition"
+              disabled={isSubmitting}
+              className="w-full md:w-[697px] py-3 bg-orange-500 text-white rounded-md text-lg font-semibold hover:bg-orange-600 transition disabled:bg-orange-300"
             >
-              Submit
+              {isSubmitting ? (
+                <span className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Submitting...
+                </span>
+              ) : (
+                "Submit"
+              )}
             </button>
           </div>
         </form>
