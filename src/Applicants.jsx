@@ -107,7 +107,6 @@ const Applicants = () => {
           navigate("/client/login");
         } else {
           const data = response.data.applicants;
-          console.log("Fetched applicants:", data);
           setApplicants(data);
         }
       } catch (err) {
@@ -128,7 +127,7 @@ const Applicants = () => {
           navigate("/client/login");
         } else {
           const data = response.data.jobpostings;
-          console.log("Fetched applicants:", data);
+
           setJobs(data);
         }
       } catch (err) {
@@ -146,19 +145,19 @@ const Applicants = () => {
           const response = await axiosInstance.get(
             `/view-resume/${detailsApplicant.id}`
           );
-  
+
           if (response.data.status_tokenized === "error") {
             localStorage.clear();
             navigate("/client/login");
           } else {
             setUrl(response.data.url);
-            console.log("Fetched resume URL:", response.data);
+          
           }
         } catch (err) {
           console.error("Error fetching resume URL:", err);
         }
       };
-  
+
       fetchResumeUrl(); // <- move this inside the if block
     }
   }, [detailsApplicant?.id, navigate]);
@@ -266,7 +265,7 @@ const Applicants = () => {
         }
       );
 
-      console.log("Update response:", updateapplicantresponse.data);
+     
 
       setShowStatusModal(false);
 

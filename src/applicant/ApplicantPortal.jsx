@@ -36,7 +36,7 @@ const ApplicantPortal = () => {
 
       // Store applicant data from response
       setApplicantData(response.data.data);
-      console.log(response.data.statuses);
+     
 
       // Set login status to true
       setIsLoggedIn(true);

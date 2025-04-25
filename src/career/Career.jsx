@@ -118,7 +118,7 @@ const Career = () => {
           navigate("/client/login");
         } else {
           setJobData(response.data.data);
-          console.log(response.data.data);
+        
         }
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
@@ -274,7 +274,7 @@ const Career = () => {
       console.error("Error submitting application:", error);
 
       if (error.response && error.response.data) {
-        console.log("Server response:", error.response.data);
+        
 
         if (error.response.data.errors) {
           const errorMessages = Object.values(error.response.data.errors)

@@ -12,7 +12,7 @@ const Dashboard = () => {
         const response = await axiosInstance.get('/dashboard');
 
         // Display the response data in the console (for debugging purposes)
-        console.log('Dashboard Data:', response.data);
+        
 
         // Check if the status_tokenized is 'error'
         if (response.data.status_tokenized === 'error') {

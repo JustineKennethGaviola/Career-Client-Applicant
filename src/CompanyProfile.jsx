@@ -31,7 +31,7 @@ const CompanyProfile = () => {
           navigate('/client/login');
         } else {
           const data = response.data.companydata;
-          console.log(data);
+          
          
           setCompanyInfo({
             companyName: data.company_name,
