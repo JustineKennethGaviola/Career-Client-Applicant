@@ -18,6 +18,11 @@ const Applicants = () => {
   const [url, setUrl] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [toast, setToast] = useState({
+    visible: false,
+    message: "",
+    type: "success",
+  });
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [selectedApplicantForStatus, setSelectedApplicantForStatus] =
     useState(null);
@@ -49,9 +54,17 @@ const Applicants = () => {
     return searchMatch && positionMatch && statusMatch;
   });
 
-  // Handle the change for the remarks field
   const handleRemarksChange = (e) => {
     setRemarks(e.target.value);
+  };
+
+  const showToast = (message, type = "success") => {
+    setToast({ visible: true, message, type });
+
+    // Automatically hide toast after 3 seconds
+    setTimeout(() => {
+      setToast({ ...toast, visible: false });
+    }, 3000);
   };
 
   const handleOpenDetailsModal = (applicant) => {
@@ -67,7 +80,7 @@ const Applicants = () => {
         applicant_id: applicant.id,
         priority_job_id: applicant.priority_job_id,
       });
-  
+
       if (response.data.status_tokenized === "error") {
         localStorage.clear();
         navigate("/client/login");
@@ -81,7 +94,6 @@ const Applicants = () => {
       handleOpenDetailsModal(applicant);
     }
   };
-  
 
   // Fetch data from the database
   useEffect(() => {
@@ -95,7 +107,7 @@ const Applicants = () => {
         } else {
           const data = response.data.applicants;
           console.log("Fetched applicants:", data);
-          setApplicants(data); // Update state with fetched data
+          setApplicants(data);
         }
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
@@ -127,7 +139,7 @@ const Applicants = () => {
   }, [navigate]);
   useEffect(() => {
     if (detailsApplicant?.resume) {
-      const baseUrl = import.meta.env.VITE_URL; // Access VITE_URL from .env
+      const baseUrl = import.meta.env.VITE_URL;
       setUrl(`${baseUrl}/uploads/${detailsApplicant.resume}`);
     }
   }, [detailsApplicant]);
@@ -160,17 +172,14 @@ const Applicants = () => {
 
   const downloadResume = async (applicantId) => {
     try {
-      // Implement for the actual backend - this is a placeholder
       const response = await axiosInstance.get(url, {
         responseType: "blob",
       });
 
-      // Create a download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
 
-      // Use the filename from the response headers if available
       const contentDisposition = response.headers["content-disposition"];
       let filename = "resume.pdf";
 
@@ -226,18 +235,40 @@ const Applicants = () => {
   };
 
   const handleStatusUpdate = async (e) => {
-    // Optionally, you can also perform other actions, such as saving the status to your database
-    const updateapplicantresponse = await axiosInstance.post(
-      "/updateapplicant",
-      {
-        id: selectedApplicantForStatus.id,
-        status: newStatus,
-        remarks: remarks,
-      }
-    );
-    console.log("Update response:", updateapplicantresponse.data);
+    try {
+      const updateapplicantresponse = await axiosInstance.post(
+        "/updateapplicant",
+        {
+          id: selectedApplicantForStatus.id,
+          status: newStatus,
+          remarks: remarks,
+        }
+      );
 
-    window.location.reload();
+      console.log("Update response:", updateapplicantresponse.data);
+
+      setShowStatusModal(false);
+
+      showToast(
+        `Status for ${selectedApplicantForStatus.firstname} updated successfully!`
+      );
+
+      const updatedApplicants = applicants.map((app) => {
+        if (app.id === selectedApplicantForStatus.id) {
+          return { ...app, applicant_status: newStatus };
+        }
+        return app;
+      });
+
+      setApplicants(updatedApplicants);
+
+      setNewStatus("");
+      setRemarks("");
+      setSelectedApplicantForStatus(null);
+    } catch (error) {
+      console.error("Error updating status:", error);
+      showToast("Failed to update status. Please try again.", "error");
+    }
   };
 
   React.useEffect(() => {
@@ -775,7 +806,9 @@ const Applicants = () => {
                           <div className="flex" key={status.id || index}>
                             <div className="flex-none mr-3">
                               <div
-                                className={`w-8 h-8 ${status.iconBg || "bg-gray-200"} rounded-full flex items-center justify-center`}
+                                className={`w-8 h-8 ${
+                                  status.iconBg || "bg-gray-200"
+                                } rounded-full flex items-center justify-center`}
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -796,13 +829,21 @@ const Applicants = () => {
                               )}
                             </div>
                             <div className={`${!isLastEvent ? "pb-5" : ""}`}>
-                              <p className="text-sm font-medium">{status.status}</p>
-                              <p className="text-xs mt-1 text-gray-600">Update Status</p>
+                              <p className="text-sm font-medium">
+                                {status.status}
+                              </p>
+                              <p className="text-xs mt-1 text-gray-600">
+                                Update Status
+                              </p>
                               {status.remarks && (
-                                <p className="text-sm mt-1 text-gray-600">{status.remarks}</p>
+                                <p className="text-sm mt-1 text-gray-600">
+                                  {status.remarks}
+                                </p>
                               )}
                               {status.date && (
-                                <p className="text-xs text-gray-500">{status.date}</p>
+                                <p className="text-xs text-gray-500">
+                                  {status.date}
+                                </p>
                               )}
                             </div>
                           </div>
@@ -811,10 +852,6 @@ const Applicants = () => {
                     </div>
                   </div>
                 </div>
-
-
-                
-
 
                 <div className="col-span-2 border-t pt-4">
                   <div className="flex justify-end space-x-3">
@@ -906,6 +943,47 @@ const Applicants = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+      {toast.visible && (
+        <div
+          className={`fixed top-4 right-4 px-6 py-3 rounded-md shadow-lg z-50 flex items-center space-x-2 ${
+            toast.type === "success"
+              ? "bg-green-500 text-white"
+              : toast.type === "error"
+              ? "bg-red-500 text-white"
+              : "bg-blue-500 text-white"
+          }`}
+        >
+          {toast.type === "success" && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          )}
+          {toast.type === "error" && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clipRule="evenodd"
+              />
+            </svg>
+          )}
+          <span>{toast.message}</span>
         </div>
       )}
     </div>
