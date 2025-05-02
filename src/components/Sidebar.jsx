@@ -1,17 +1,13 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import CompanyLogo from "./../assets/RCCLogo-White.png"
+import CompanyLogo from "./../assets/RCCLogo-White.png";
 
 const Sidebar = () => {
   return (
     <div className="bg-[#0A2472] text-white w-90 min-h-screen">
       {/* Logo */}
       <div className="py-6 px-4 flex items-center justify-center">
-        <img
-          src={CompanyLogo}
-          alt="RCC Logo"
-          className="h-12"
-        />
+        <img src={CompanyLogo} alt="RCC Logo" className="h-12" />
         <div className="ml-2 font-semibold">
           <div className="font-bold">RCC COLAB SOLUTIONS INC.</div>
         </div>
@@ -99,6 +95,33 @@ const Sidebar = () => {
               />
             </svg>
             Company Profile
+          </NavLink>
+
+          <NavLink
+            to="/client/message"
+            className={({ isActive }) =>
+              `flex items-center px-4 py-3 rounded-xl transition-all duration-200 ${
+                isActive
+                  ? "text-white bg-blue-800/40 shadow-md"
+                  : "text-blue-100 hover:bg-blue-800/40"
+              }`
+            }
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+            Messages
           </NavLink>
         </div>
       </nav>

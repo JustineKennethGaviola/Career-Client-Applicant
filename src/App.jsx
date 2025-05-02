@@ -7,6 +7,7 @@ import Applicants from "./Applicants";
 import CompanyProfile from "./CompanyProfile";
 import CareerJob from "./career/CareerJob";
 import Career from "./career/Career";
+import Messages from "./Messages";
 import ReviewLogo from "./assets/Review.png";
 import StatusLogo from "./assets/Status.png";
 import CareerLogo from "./assets/Career-Job.png";
@@ -256,6 +257,15 @@ function App() {
             element={
               <ClientLayout>
                 <CompanyProfile />
+              </ClientLayout>
+            }
+          />
+
+          <Route
+            path="/client/message"
+            element={
+              <ClientLayout>
+                <Messages />
               </ClientLayout>
             }
           />
