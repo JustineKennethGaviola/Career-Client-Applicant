@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import logoImage from "../assets/RCCLogo-White.png";
 import axios from "../api/axios";
+import MessagesModal, { MessageButton } from "./Messages";
 
 const ApplicantPortal = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [applicantData, setApplicantData] = useState(null);
   const [applicantStatus, setApplicantStatus] = useState(null);
   const [applicationCode, setApplicationCode] = useState("");
@@ -34,16 +36,11 @@ const ApplicantPortal = () => {
         token: token,
       });
 
-      // Store applicant data from response
       setApplicantData(response.data.data);
-     
 
-      // Set login status to true
       setIsLoggedIn(true);
 
-      // Set login success message
       setLoginSuccess(true);
-      // Success toast removed from here
     } catch (err) {
       console.error(err);
       showToast(
@@ -331,6 +328,14 @@ const ApplicantPortal = () => {
           </div>
         </div>
 
+        {/* Message Button */}
+        {isLoggedIn && (
+          <MessageButton
+            onClick={() => setIsMessageModalOpen(true)}
+            hasUnread={true}
+          />
+        )}
+
         {/* Profile Section - Right Side - Only shows when logged in */}
         {isLoggedIn && (
           <div
@@ -417,14 +422,14 @@ const ApplicantPortal = () => {
                   {/* Contact info with icons */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="flex items-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 text-[#0A2472] mr-2"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M2.25 4.5A2.25 2.25 0 014.5 2.25h15a2.25 2.25 0 012.25 2.25v15a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 19.5v-15zm1.5 0v.511l8.25 5.39 8.25-5.39V4.5h-16.5zm0 1.91v12.59h16.5V6.41l-8.036 5.248a.75.75 0 01-.828 0L3.75 6.41z" />
-                    </svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 text-[#0A2472] mr-2"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M2.25 4.5A2.25 2.25 0 014.5 2.25h15a2.25 2.25 0 012.25 2.25v15a2.25 2.25 0 01-2.25 2.25h-15A2.25 2.25 0 012.25 19.5v-15zm1.5 0v.511l8.25 5.39 8.25-5.39V4.5h-16.5zm0 1.91v12.59h16.5V6.41l-8.036 5.248a.75.75 0 01-.828 0L3.75 6.41z" />
+                      </svg>
 
                       <div>
                         <p className="text-xs text-gray-500">Email</p>
@@ -504,11 +509,15 @@ const ApplicantPortal = () => {
                     </div>
                   </div>
                 </div>
-
-               
               </div>
             </div>
           </div>
+        )}
+        {isLoggedIn && (
+          <MessagesModal
+            isOpen={isMessageModalOpen}
+            onClose={() => setIsMessageModalOpen(false)}
+          />
         )}
       </div>
       <ToastNotification />
