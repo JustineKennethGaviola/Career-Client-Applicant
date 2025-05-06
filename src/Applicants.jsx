@@ -32,6 +32,39 @@ const Applicants = () => {
   const [jobs, setJobs] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
+  const [interviewDetails, setInterviewDetails] = useState({
+    title: "",
+    attendees: "",
+    startDate: "",
+    startTime: "",
+    endDate: "",
+    endTime: "",
+    locationType: "online",
+  });
+
+  const handleInterviewInputChange = (e) => {
+    const { name, value } = e.target;
+    setInterviewDetails({
+      ...interviewDetails,
+      [name]: value,
+    });
+  };
+
+  const handleScheduleInterview = () => {
+    // Add API call if there is a backend for schedule interview
+    console.log("Scheduling interview:", interviewDetails);
+
+    showToast("Interview scheduled successfully!");
+    setShowInterviewModal(false);
+  };
+
+  const handleOpenInterviewModal = (applicant) => {
+    setSelectedApplicantForStatus(applicant);
+    setShowInterviewModal(true);
+    setOpenDropdown(null);
+  };
+
   const filteredApplicants = applicants.filter((applicant) => {
     // Search term filter
     const searchMatch =
@@ -151,7 +184,6 @@ const Applicants = () => {
             navigate("/client/login");
           } else {
             setUrl(response.data.url);
-          
           }
         } catch (err) {
           console.error("Error fetching resume URL:", err);
@@ -264,8 +296,6 @@ const Applicants = () => {
           remarks: remarks,
         }
       );
-
-     
 
       setShowStatusModal(false);
 
@@ -513,6 +543,17 @@ const Applicants = () => {
                         >
                           Update Status
                         </a>
+                        <a
+                          href="#"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleOpenInterviewModal(applicant);
+                          }}
+                        >
+                          Schedule Interview
+                        </a>
                       </div>
                     </td>
                   </tr>
@@ -754,6 +795,173 @@ const Applicants = () => {
           </div>
         </div>
       )}
+
+      {/* Interview Modal */}
+      {showInterviewModal && selectedApplicantForStatus && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">
+                Schedule Interview for{" "}
+                {selectedApplicantForStatus.firstname +
+                  " " +
+                  selectedApplicantForStatus.lastname}
+              </h3>
+              <button
+                onClick={() => setShowInterviewModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Interview Title
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={interviewDetails.title}
+                  onChange={handleInterviewInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  placeholder="e.g., Technical Interview Round 1"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Attendees
+                </label>
+                <input
+                  type="text"
+                  name="attendees"
+                  value={interviewDetails.attendees}
+                  onChange={handleInterviewInputChange}
+                  className="w-full border border-gray-300 rounded-md p-2"
+                  placeholder="e.g., HR Manager, Team Lead"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Separate multiple attendees with commas
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={interviewDetails.startDate}
+                    onChange={handleInterviewInputChange}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    name="startTime"
+                    value={interviewDetails.startTime}
+                    onChange={handleInterviewInputChange}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={interviewDetails.endDate}
+                    onChange={handleInterviewInputChange}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    name="endTime"
+                    value={interviewDetails.endTime}
+                    onChange={handleInterviewInputChange}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Interview Type
+                </label>
+                <div className="flex space-x-4 mt-2">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="locationType"
+                      value="online"
+                      checked={interviewDetails.locationType === "online"}
+                      onChange={handleInterviewInputChange}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 text-sm">Online</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      name="locationType"
+                      value="physical"
+                      checked={interviewDetails.locationType === "physical"}
+                      onChange={handleInterviewInputChange}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <span className="ml-2 text-sm">Physical</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                onClick={() => setShowInterviewModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleScheduleInterview}
+                className="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800"
+              >
+                Schedule Interview
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Applicant Details Modal */}
       {showDetailsModal && detailsApplicant && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
