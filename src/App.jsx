@@ -18,6 +18,7 @@ import ApplicantPortal from "./applicant/ApplicantPortal";
 import logoBlue from "./assets/RCCLogo-White.png";
 import useAutoLogout from "./hooks/useAutoLogout";
 import DisableConsole from "./hooks/DisableConsole";
+import Schedules from "./Schedule";
 
 // Client/Company Layout
 const ClientLayout = ({ children }) => {
@@ -266,6 +267,15 @@ function App() {
             element={
               <ClientLayout>
                 <Messages />
+              </ClientLayout>
+            }
+          />
+
+          <Route
+            path="/client/schedules"
+            element={
+              <ClientLayout>
+                <Schedules />
               </ClientLayout>
             }
           />

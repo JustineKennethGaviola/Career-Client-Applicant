@@ -41,6 +41,8 @@ const Applicants = () => {
     endDate: "",
     endTime: "",
     locationType: "online",
+    location: "",
+    remarks: "",
   });
 
   const handleInterviewInputChange = (e) => {
@@ -51,12 +53,133 @@ const Applicants = () => {
     });
   };
 
-  const handleScheduleInterview = () => {
-    // Add API call if there is a backend for schedule interview
-    console.log("Scheduling interview:", interviewDetails);
+  const handleScheduleInterview = async () => {
+    // Validate form fields
+    if (
+      !interviewDetails.title ||
+      !interviewDetails.attendees ||
+      !interviewDetails.startDate ||
+      !interviewDetails.startTime ||
+      !interviewDetails.endDate ||
+      !interviewDetails.endTime
+    ) {
+      showToast("Please fill in all required fields", "error");
+      return;
+    }
 
-    showToast("Interview scheduled successfully!");
-    setShowInterviewModal(false);
+    if (
+      interviewDetails.locationType === "physical" &&
+      !interviewDetails.location
+    ) {
+      showToast("Please provide the interview location", "error");
+      return;
+    }
+
+    try {
+      // Convert date format from YYYY-MM-DD to MM/DD/YYYY
+      const formatDate = (dateString) => {
+        if (!dateString) return "";
+        const [year, month, day] = dateString.split("-");
+        return `${month}/${day}/${year}`;
+      };
+
+      // Convert time to 12 hour format with AM/PM
+      const formatTime = (timeString) => {
+        if (!timeString) return "";
+        const [hours, minutes] = timeString.split(":");
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${minutes} ${ampm}`;
+      };
+
+      const formatAttendees = (attendeesString) => {
+        if (!attendeesString) return [];
+
+        const attendeeArray = attendeesString
+          .split(",")
+          .map((email) => email.trim());
+
+        if (
+          !attendeeArray.includes("automatic-message@rcccolabsolutions.com")
+        ) {
+          attendeeArray.unshift("automatic-message@rcccolabsolutions.com");
+        }
+
+        return JSON.stringify(attendeeArray);
+      };
+
+      const scheduleData = {
+        applicant_id: parseInt(selectedApplicantForStatus.id),
+        job_posting_id: parseInt(selectedApplicantForStatus.priority_job_id),
+        client_id: 7,
+        subject: interviewDetails.title.trim(),
+
+        attendee: formatAttendees(interviewDetails.attendees),
+
+        start_schedule_date: formatDate(interviewDetails.startDate),
+        start_schedule_time: formatTime(interviewDetails.startTime),
+        end_schedule_date: formatDate(interviewDetails.endDate),
+        end_schedule_time: formatTime(interviewDetails.endTime),
+        schedule_type: interviewDetails.locationType,
+
+        location:
+          interviewDetails.locationType === "physical"
+            ? interviewDetails.location.trim() || "Office"
+            : "Teams",
+        remarks: interviewDetails.remarks
+          ? interviewDetails.remarks.trim()
+          : "",
+      };
+
+      const response = await axiosInstance.post(
+        "/scheduleapplicant",
+        scheduleData
+      );
+
+      console.log("Schedule response:", response);
+
+      if (response.data && response.data.status === "success") {
+        showToast(
+          "Interview scheduled successfully! Waiting for admin approval."
+        );
+        setShowInterviewModal(false);
+
+        setInterviewDetails({
+          title: "",
+          attendees: "",
+          startDate: "",
+          startTime: "",
+          endDate: "",
+          endTime: "",
+          locationType: "online",
+          location: "",
+          remarks: "",
+        });
+      } else {
+        showToast(
+          response.data?.message || "Failed to schedule interview",
+          "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error scheduling interview:", error);
+
+      const responseData = error.response?.data;
+      console.log("Server error details:", responseData);
+
+      if (responseData && responseData.message) {
+        showToast(
+          `Database error: ${responseData.message.split(":").pop().trim()}`,
+          "error"
+        );
+      } else {
+        showToast(
+          "Failed to schedule interview. Please try again later.",
+          "error"
+        );
+      }
+    }
   };
 
   const handleOpenInterviewModal = (applicant) => {
@@ -942,6 +1065,36 @@ const Applicants = () => {
                   </label>
                 </div>
               </div>
+
+              {interviewDetails.locationType === "physical" && (
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={interviewDetails.location || ""}
+                    onChange={handleInterviewInputChange}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                    placeholder="e.g., Conference Room 3, Building A"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1 mt-4">
+                Remarks (Optional)
+              </label>
+              <textarea
+                name="remarks"
+                value={interviewDetails.remarks || ""}
+                onChange={handleInterviewInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+                placeholder="Additional notes for this interview"
+                rows="3"
+              />
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
@@ -955,7 +1108,7 @@ const Applicants = () => {
                 onClick={handleScheduleInterview}
                 className="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800"
               >
-                Schedule Interview
+                Submit
               </button>
             </div>
           </div>
