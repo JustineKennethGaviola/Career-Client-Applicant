@@ -19,6 +19,9 @@ const Applicants = () => {
   const [url, setUrl] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [selectedApplicantForMessage, setSelectedApplicantForMessage] =
+    useState(null);
   const [toast, setToast] = useState({
     visible: false,
     message: "",
@@ -51,6 +54,12 @@ const Applicants = () => {
       ...interviewDetails,
       [name]: value,
     });
+  };
+
+  const handleOpenMessageConfirmation = (applicant) => {
+    setSelectedApplicantForMessage(applicant);
+    setShowConfirmationModal(true);
+    setOpenDropdown(null);
   };
 
   const handleScheduleInterview = async () => {
@@ -384,12 +393,6 @@ const Applicants = () => {
     setOpenDropdown(null);
   };
 
-  const handleOpenEmailModal = (applicant) => {
-    setSelectedApplicant(applicant);
-    setShowEmailModal(true);
-    setOpenDropdown(null);
-  };
-
   const handleFilterChange = (e, filterType) => {
     setFilters({
       ...filters,
@@ -677,6 +680,17 @@ const Applicants = () => {
                         >
                           Schedule Interview
                         </a>
+                        <a
+                          href="#"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleOpenMessageConfirmation(applicant);
+                          }}
+                        >
+                          Send Message
+                        </a>
                       </div>
                     </td>
                   </tr>
@@ -730,6 +744,94 @@ const Applicants = () => {
           </div>
         )}
       </div>
+
+      {/* Message Confirmation Modal */}
+      {showConfirmationModal && selectedApplicantForMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Confirm Message</h3>
+              <button
+                onClick={() => setShowConfirmationModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <p className="mb-4">
+              Are you sure you want to send a message to{" "}
+              {selectedApplicantForMessage.firstname}{" "}
+              {selectedApplicantForMessage.lastname}?
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowConfirmationModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setShowConfirmationModal(false);
+
+                  // Create automatic welcome message
+                  const welcomeMessage = `Hello ${selectedApplicantForMessage.firstname}, thank you for your application for the ${selectedApplicantForMessage.jobtitle} position. How may we assist you?`;
+
+                  try {
+                    // Get client ID from localStorage or use a default
+                    const clientId = localStorage.getItem("client_id") || "7";
+
+                    // Start conversation on the server
+                    const response = await axiosInstance.post(
+                      "/messages/start-conversation",
+                      {
+                        applicant_id: selectedApplicantForMessage.id,
+                        client_id: clientId,
+                        job_id: selectedApplicantForMessage.priority_job_id,
+                        message: welcomeMessage,
+                      }
+                    );
+
+                    if (response.data.status === "success") {
+                      showToast("Message sent successfully!");
+                    } else {
+                      console.error("Failed to send message:", response.data);
+                      showToast("Failed to send message", "error");
+                    }
+                  } catch (error) {
+                    console.error("Error sending message:", error);
+                    showToast("Error sending message", "error");
+                  }
+
+                  // Navigate to messages page
+                  navigate("/client/message", {
+                    state: {
+                      applicant: selectedApplicantForMessage,
+                    },
+                  });
+                }}
+                className="px-4 py-2 bg-blue-900 text-white rounded-md hover:bg-blue-800"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Email Modal */}
       {showEmailModal && selectedApplicant && (
