@@ -13,36 +13,17 @@ function Messages() {
   const [sendingMessage, setSendingMessage] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Fetch conversations from API
   useEffect(() => {
     const fetchConversations = async () => {
       setLoading(true);
       try {
         const response = await axiosInstance.get("/messages/conversations");
-
         if (response.data.status === "success") {
           const conversationsData = response.data.data.map((conv) => ({
             ...conv,
             active: false,
           }));
-
           setConversations(conversationsData);
-
-          // Handle active conversation based on URL state or select first one
-          if (location.state?.applicant) {
-            const applicantId = Number(location.state.applicant.id);
-            const matchingConv = conversationsData.find(
-              (c) => c.applicant_id === applicantId
-            );
-
-            if (matchingConv) {
-              selectConversation(matchingConv);
-            } else if (conversationsData.length > 0) {
-              selectConversation(conversationsData[0]);
-            }
-          } else if (conversationsData.length > 0) {
-            selectConversation(conversationsData[0]);
-          }
         }
       } catch (error) {
         console.error("Error fetching conversations:", error);
@@ -50,7 +31,6 @@ function Messages() {
         setLoading(false);
       }
     };
-
     fetchConversations();
   }, [location.state]);
 
