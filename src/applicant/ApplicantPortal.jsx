@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import logoImage from "../assets/RCCLogo-White.png";
 import axios from "../api/axios";
@@ -12,9 +12,39 @@ const ApplicantPortal = () => {
   const [applicationCode, setApplicationCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const recaptchaRef = React.createRef();
+  const [conversations, setConversations] = useState([]);
+  const [activeConversation, setActiveConversation] = useState(null);
   const [, setLoginSuccess] = useState(false);
   const [toast, setToast] = useState({ visible: false, message: "", type: "" });
 
+  const fetchConversations = useCallback(async () => {
+    if (!applicantData?.id) {
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        "http://localhost/api/messages/applicant/conversations",
+        {
+          headers: {
+            "X-Applicant-ID": applicantData.id,
+          },
+        }
+      );
+
+      if (response.data.status === "success") {
+        setConversations(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+    }
+  }, [applicantData?.id]);
+
+  useEffect(() => {
+    if (isLoggedIn && applicantData) {
+      fetchConversations();
+    }
+  }, [isLoggedIn, applicantData, fetchConversations]);
   // Update the handleSubmit function to remove the success toast
   // In the try block of the handleSubmit function, remove this line:
   // showToast("Login successful!", "success");
@@ -36,10 +66,16 @@ const ApplicantPortal = () => {
         token: token,
       });
 
-      setApplicantData(response.data.data);
+      console.log("Login response:", response.data); // Add this to see the response
 
+      // Make sure to properly map the ID from the response
+      const applicantData = response.data.data;
+
+      // Log the applicant data to see its structure
+      console.log("Applicant data:", applicantData);
+
+      setApplicantData(applicantData);
       setIsLoggedIn(true);
-
       setLoginSuccess(true);
     } catch (err) {
       console.error(err);
@@ -517,6 +553,9 @@ const ApplicantPortal = () => {
           <MessagesModal
             isOpen={isMessageModalOpen}
             onClose={() => setIsMessageModalOpen(false)}
+            applicantId={applicantData?.id}
+            conversations={conversations}
+            onConversationUpdate={fetchConversations}
           />
         )}
       </div>
