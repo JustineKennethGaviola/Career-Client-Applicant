@@ -291,15 +291,31 @@ function Messages() {
                         }`}
                       >
                         {message.content.map((text, idx) => (
-                          <div
-                            key={idx}
-                            className={`${
-                              message.received
-                                ? "bg-gray-200 text-gray-800"
-                                : "bg-blue-500 text-white ml-auto"
-                            } rounded-lg p-3 text-sm`}
-                          >
-                            <p>{text}</p>
+                          <div key={idx}>
+                            <div
+                              className={`${
+                                message.received
+                                  ? "bg-gray-200 text-gray-800"
+                                  : "bg-blue-500 text-white ml-auto"
+                              } rounded-lg p-3 text-sm`}
+                            >
+                              <p>{text}</p>
+                            </div>
+                            {idx === message.content.length - 1 && (
+                              <p
+                                className={`text-xs text-gray-500 mt-1 ${
+                                  message.received ? "" : "text-right"
+                                }`}
+                              >
+                                {message.time ||
+                                  new Date(
+                                    message.timestamp
+                                  ).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                              </p>
+                            )}
                           </div>
                         ))}
                       </div>
