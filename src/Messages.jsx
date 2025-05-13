@@ -34,14 +34,11 @@ function Messages() {
     fetchConversations();
   }, [location.state]);
 
-  // Scroll to bottom whenever messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Select a conversation and fetch its messages
   const selectConversation = async (conversation) => {
-    // Update active state in conversations list
     const updatedConversations = conversations.map((conv) => ({
       ...conv,
       active: conv.id === conversation.id,
@@ -70,7 +67,6 @@ function Messages() {
 
     setSendingMessage(true);
 
-    // Create temp message object for optimistic UI update
     const tempMessageObj = {
       id: Date.now(),
       sender: "Company",
@@ -84,15 +80,12 @@ function Messages() {
       }),
     };
 
-    // Optimistically update UI
     setMessages((prev) => [...prev, tempMessageObj]);
     setNewMessage("");
 
     try {
-      // Get company ID from local storage (or wherever you store it)
-      const clientId = localStorage.getItem("client_id") || "7"; // Default to 7 if not found
+      const clientId = localStorage.getItem("client_id") || "7";
 
-      // Send to server
       const response = await axiosInstance.post("/messages/send", {
         conversation_id: activeConversation.id,
         sender_id: clientId,
@@ -102,9 +95,7 @@ function Messages() {
 
       if (response.data.status !== "success") {
         console.error("Failed to send message:", response.data);
-        // Could show error toast here
       } else {
-        // Update the conversation list with the latest message
         setConversations((prev) =>
           prev.map((conv) => {
             if (conv.id === activeConversation.id) {
@@ -123,16 +114,59 @@ function Messages() {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      // Could show error toast here
     } finally {
       setSendingMessage(false);
     }
   };
 
-  // Filter conversations based on search term
   const filteredConversations = conversations.filter((conv) =>
     conv.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  useEffect(() => {
+    if (!activeConversation) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await axiosInstance.get(
+          `/messages/conversation/${activeConversation.id}`
+        );
+
+        if (response.data.status === "success") {
+          if (response.data.data.length > messages.length) {
+            setMessages(response.data.data);
+
+            const latestMessage =
+              response.data.data[response.data.data.length - 1];
+            if (latestMessage.received) {
+              setConversations((prev) =>
+                prev.map((conv) => {
+                  if (conv.id === activeConversation.id) {
+                    return {
+                      ...conv,
+                      last_message:
+                        latestMessage.content[latestMessage.content.length - 1],
+                      last_message_time: new Date(
+                        latestMessage.timestamp
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }),
+                    };
+                  }
+                  return conv;
+                })
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error polling messages:", error);
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [activeConversation, messages.length]);
 
   return (
     <div className="flex h-screen bg-white">

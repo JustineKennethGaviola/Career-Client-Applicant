@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import axiosInstance from "./api/tokenizedaxios";
+import PasswordChangeModal from "./PasswordChangeModal";
 
 const Applicants = () => {
   const navigate = useNavigate();
@@ -36,6 +37,8 @@ const Applicants = () => {
   const [statuses, setStatuses] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showInterviewModal, setShowInterviewModal] = useState(false);
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const [interviewDetails, setInterviewDetails] = useState({
     title: "",
     attendees: "",
@@ -400,6 +403,32 @@ const Applicants = () => {
     });
   };
 
+  useEffect(() => {
+    const checkPasswordStatus = async () => {
+      try {
+        const email = localStorage.getItem("email");
+        if (email) {
+          setUserEmail(email);
+
+          const stPassword = localStorage.getItem("stPassword");
+          if (stPassword === "0") {
+            setShowPasswordChangeModal(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking password status:", error);
+      }
+    };
+
+    checkPasswordStatus();
+  }, []);
+
+  const handlePasswordChanged = () => {
+    localStorage.setItem("stPassword", "1");
+    setShowPasswordChangeModal(false);
+    showToast("Password changed successfully!");
+  };
+
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
@@ -458,6 +487,12 @@ const Applicants = () => {
 
   return (
     <div className="p-6">
+      <PasswordChangeModal
+        isOpen={showPasswordChangeModal}
+        onClose={() => setShowPasswordChangeModal(false)}
+        email={userEmail}
+        onPasswordChanged={handlePasswordChanged}
+      />
       {/* Header Section */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Applicants</h1>

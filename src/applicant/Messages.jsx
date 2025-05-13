@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "../api/axios";
 
 const MessagesModal = ({
@@ -78,6 +78,40 @@ const MessagesModal = ({
       hour12: true,
     });
   };
+
+  useEffect(() => {
+    if (!selectedConversation) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost/api/messages/applicant/conversation/${selectedConversation.id}`,
+          {
+            headers: {
+              "X-Applicant-ID": applicantId,
+            },
+          }
+        );
+
+        if (response.data.status === "success") {
+          if (response.data.data.length > messages.length) {
+            setMessages(response.data.data);
+
+            onConversationUpdate();
+          }
+        }
+      } catch (error) {
+        console.error("Error polling messages:", error);
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [
+    selectedConversation,
+    messages.length,
+    applicantId,
+    onConversationUpdate,
+  ]);
 
   return (
     <div className={`fixed inset-0 z-50 ${isOpen ? "visible" : "invisible"}`}>

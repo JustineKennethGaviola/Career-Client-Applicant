@@ -84,14 +84,12 @@ const Login = () => {
   const recaptchaRef = React.createRef();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Toast state
   const [toast, setToast] = useState({
     show: false,
     message: "",
     type: "success",
   });
 
-  // Function to show toast
   const showToast = (message, type = "success") => {
     setToast({
       show: true,
@@ -100,7 +98,6 @@ const Login = () => {
     });
   };
 
-  // Function to hide toast
   const hideToast = () => {
     setToast((prev) => ({
       ...prev,
@@ -110,13 +107,13 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsProcessing(true); // Set processing state to true when form is submitted
+    setIsProcessing(true);
 
     try {
       const token = recaptchaRef.current.getValue();
       if (!token) {
         showToast("Please complete the reCAPTCHA challenge.", "error");
-        setIsProcessing(false); // Reset processing state
+        setIsProcessing(false);
         return;
       }
 
@@ -126,45 +123,21 @@ const Login = () => {
         token: token,
       });
 
-      // If successful, show success toast
       showToast("Login successful! Redirecting to dashboard...");
 
-      // Save data to localStorage
       localStorage.setItem("token", response.data.data.token);
       localStorage.setItem("user", response.data.data.user);
       localStorage.setItem("email", response.data.data.email);
 
-      // Short delay before redirect to show the toast
+      localStorage.setItem("stPassword", response.data.data.stPassword || "1");
+
       setTimeout(() => {
         navigate("/client/applicants");
       }, 1500);
     } catch (err) {
-      console.error(err);
-
-      // Handle different error cases
-      if (err.response) {
-        if (err.response.data.message) {
-          // Backend returned a specific error message
-          showToast(err.response.data.message, "error");
-        } else if (err.response.status === 401) {
-          // Unauthorized - wrong email or code
-          showToast(
-            "Invalid email or sign-in code. Please try again.",
-            "error"
-          );
-        } else {
-          // Generic server error
-          showToast("Server error. Please try again later.", "error");
-        }
-      } else if (err.request) {
-        // Network error
-        showToast("Network error. Please check your connection.", "error");
-      } else {
-        // Other errors
-        showToast("An unexpected error occurred. Please try again.", "error");
-      }
-
-      setIsProcessing(false); // Reset processing state on error
+      console.error("Login error:", err);
+      showToast("An error occurred during login. Please try again.", "error");
+      setIsProcessing(false);
     }
   };
 
