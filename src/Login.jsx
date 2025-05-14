@@ -107,13 +107,13 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setIsProcessing(true);
 
     try {
       const token = recaptchaRef.current.getValue();
       if (!token) {
         showToast("Please complete the reCAPTCHA challenge.", "error");
-        
+        setIsProcessing(false);
         return;
       }
 
@@ -129,37 +129,14 @@ const Login = () => {
       localStorage.setItem("user", response.data.data.user);
       localStorage.setItem("email", response.data.data.email);
 
-      
+      localStorage.setItem("stPassword", response.data.data.stPassword || "1");
 
       setTimeout(() => {
         navigate("/client/applicants");
       }, 1500);
     } catch (err) {
-      console.error(err);
-
-      // Handle different error cases
-      if (err.response) {
-        if (err.response.data.message) {
-          // Backend returned a specific error message
-          showToast(err.response.data.message, "error");
-        } else if (err.response.status === 401) {
-          // Unauthorized - wrong email or code
-          showToast(
-            "Invalid email or sign-in code. Please try again.",
-            "error"
-          );
-        } else {
-          // Generic server error
-          showToast("Server error. Please try again later.", "error");
-        }
-      } else if (err.request) {
-        // Network error
-        showToast("Network error. Please check your connection.", "error");
-      } else {
-        // Other errors
-        showToast("An unexpected error occurred. Please try again.", "error");
-      }
-
+      console.error("Login error:", err);
+      showToast("An error occurred during login. Please try again.", "error");
       setIsProcessing(false);
     }
   };

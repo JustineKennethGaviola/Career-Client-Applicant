@@ -123,7 +123,50 @@ function Messages() {
     conv.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  
+  useEffect(() => {
+    if (!activeConversation) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await axiosInstance.get(
+          `/messages/conversation/${activeConversation.id}`
+        );
+
+        if (response.data.status === "success") {
+          if (response.data.data.length > messages.length) {
+            setMessages(response.data.data);
+
+            const latestMessage =
+              response.data.data[response.data.data.length - 1];
+            if (latestMessage.received) {
+              setConversations((prev) =>
+                prev.map((conv) => {
+                  if (conv.id === activeConversation.id) {
+                    return {
+                      ...conv,
+                      last_message:
+                        latestMessage.content[latestMessage.content.length - 1],
+                      last_message_time: new Date(
+                        latestMessage.timestamp
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }),
+                    };
+                  }
+                  return conv;
+                })
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error polling messages:", error);
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [activeConversation, messages.length]);
 
   return (
     <div className="flex h-screen bg-white">
