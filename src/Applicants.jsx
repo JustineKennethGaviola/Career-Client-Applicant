@@ -149,8 +149,6 @@ const Applicants = () => {
         scheduleData
       );
 
-      console.log("Schedule response:", response);
-
       if (response.data && response.data.status === "success") {
         showToast(
           "Interview scheduled successfully! Waiting for admin approval."
@@ -178,7 +176,6 @@ const Applicants = () => {
       console.error("Error scheduling interview:", error);
 
       const responseData = error.response?.data;
-      console.log("Server error details:", responseData);
 
       if (responseData && responseData.message) {
         showToast(
@@ -823,36 +820,112 @@ const Applicants = () => {
                 onClick={async () => {
                   setShowConfirmationModal(false);
 
-                  // Create automatic welcome message
                   const welcomeMessage = `Hello ${selectedApplicantForMessage.firstname}, thank you for your application for the ${selectedApplicantForMessage.jobtitle} position. How may we assist you?`;
 
                   try {
-                    // Get client ID from localStorage or use a default
-                    const clientId = localStorage.getItem("client_id") || "7";
+                    let companyId;
+                    try {
+                      const dashboardResponse = await axiosInstance.get(
+                        "/dashboard"
+                      );
+                      if (
+                        dashboardResponse.data &&
+                        dashboardResponse.data.company_id
+                      ) {
+                        companyId = dashboardResponse.data.company_id;
+                      }
+                    } catch (dashError) {
+                      console.error(
+                        "Error fetching company ID from dashboard:",
+                        dashError
+                      );
+                    }
 
-                    // Start conversation on the server
-                    const response = await axiosInstance.post(
+                    if (!companyId) {
+                      try {
+                        const profileResponse = await axiosInstance.get(
+                          "/companyprofile"
+                        );
+                        if (
+                          profileResponse.data &&
+                          profileResponse.data.status_tokenized === "success" &&
+                          profileResponse.data.code === 200
+                        ) {
+                          companyId = 1;
+                        }
+                      } catch (profileError) {
+                        console.error(
+                          "Error fetching company profile:",
+                          profileError
+                        );
+                      }
+                    }
+
+                    if (!companyId) {
+                      companyId = 1;
+                    }
+
+                    const conversationResponse = await axiosInstance.post(
                       "/messages/start-conversation",
                       {
-                        applicant_id: selectedApplicantForMessage.id,
-                        client_id: clientId,
-                        job_id: selectedApplicantForMessage.priority_job_id,
+                        applicant_id: parseInt(selectedApplicantForMessage.id),
+                        client_id: parseInt(companyId),
+                        job_id: parseInt(
+                          selectedApplicantForMessage.priority_job_id
+                        ),
                         message: welcomeMessage,
+                        is_from_client: true,
                       }
                     );
 
-                    if (response.data.status === "success") {
+                    if (conversationResponse.data.status === "success") {
                       showToast("Message sent successfully!");
                     } else {
-                      console.error("Failed to send message:", response.data);
+                      console.error(
+                        "Failed to send message:",
+                        conversationResponse.data
+                      );
                       showToast("Failed to send message", "error");
                     }
                   } catch (error) {
                     console.error("Error sending message:", error);
-                    showToast("Error sending message", "error");
+
+                    if (error.response && error.response.data) {
+                      console.error(
+                        "Error response data:",
+                        error.response.data
+                      );
+                      console.error(
+                        "Error response status:",
+                        error.response.status
+                      );
+
+                      if (error.response.data.errors) {
+                        const errorMessages = Object.entries(
+                          error.response.data.errors
+                        )
+                          .map(
+                            ([field, msgs]) => `${field}: ${msgs.join(", ")}`
+                          )
+                          .join("\n");
+                        console.error("Validation errors:", errorMessages);
+                        showToast(
+                          `Validation error: ${errorMessages}`,
+                          "error"
+                        );
+                      } else if (error.response.data.message) {
+                        showToast(
+                          `Error: ${error.response.data.message}`,
+                          "error"
+                        );
+                      } else {
+                        showToast("Error sending message", "error");
+                      }
+                    } else {
+                      showToast(`Error: ${error.message}`, "error");
+                    }
                   }
 
-                  // Navigate to messages page
                   navigate("/client/message", {
                     state: {
                       applicant: selectedApplicantForMessage,

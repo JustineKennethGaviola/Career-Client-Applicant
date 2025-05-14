@@ -66,13 +66,7 @@ const ApplicantPortal = () => {
         token: token,
       });
 
-      console.log("Login response:", response.data); // Add this to see the response
-
-      // Make sure to properly map the ID from the response
       const applicantData = response.data.data;
-
-      // Log the applicant data to see its structure
-      console.log("Applicant data:", applicantData);
 
       setApplicantData(applicantData);
       setIsLoggedIn(true);

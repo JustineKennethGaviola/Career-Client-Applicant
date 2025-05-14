@@ -47,6 +47,7 @@ const MessagesModal = ({
           sender_id: applicantId,
           receiver_id: selectedConversation.company_id,
           message: newMessage,
+          is_from_client: false,
         }
       );
 
