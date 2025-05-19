@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "../api/axios";
+import axiosInstance from "../api/tokenizedaxios";
 
 const MessagesModal = ({
   isOpen,
@@ -17,13 +17,8 @@ const MessagesModal = ({
     setSelectedConversation(conversation);
 
     try {
-      const response = await axios.get(
-        `http://localhost/api/messages/applicant/conversation/${conversation.id}`,
-        {
-          headers: {
-            "X-Applicant-ID": applicantId,
-          },
-        }
+      const response = await axiosInstance.get(
+        `/messages/applicant/conversation/${conversation.id}`
       );
 
       if (response.data.status === "success") {
@@ -40,22 +35,17 @@ const MessagesModal = ({
     setSendingMessage(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost/api/messages/applicant/send",
-        {
-          conversation_id: selectedConversation.id,
-          sender_id: applicantId,
-          receiver_id: selectedConversation.company_id,
-          message: newMessage,
-          is_from_client: false,
-        }
-      );
+      const response = await axiosInstance.post("/messages/applicant/send", {
+        conversation_id: selectedConversation.id,
+        sender_id: applicantId,
+        receiver_id: selectedConversation.company_id,
+        message: newMessage,
+        is_from_client: false,
+      });
 
       if (response.data.status === "success") {
         setNewMessage("");
-
         await selectConversation(selectedConversation);
-
         onConversationUpdate();
       }
     } catch (error) {
@@ -85,19 +75,13 @@ const MessagesModal = ({
 
     const pollInterval = setInterval(async () => {
       try {
-        const response = await axios.get(
-          `http://localhost/api/messages/applicant/conversation/${selectedConversation.id}`,
-          {
-            headers: {
-              "X-Applicant-ID": applicantId,
-            },
-          }
+        const response = await axiosInstance.get(
+          `/messages/applicant/conversation/${selectedConversation.id}`
         );
 
         if (response.data.status === "success") {
           if (response.data.data.length > messages.length) {
             setMessages(response.data.data);
-
             onConversationUpdate();
           }
         }
