@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axiosInstance from "../api/tokenizedaxios";
+import applicantAxios from "../api/applicantAxios";
 
 const MessagesModal = ({
   isOpen,
@@ -17,8 +17,13 @@ const MessagesModal = ({
     setSelectedConversation(conversation);
 
     try {
-      const response = await axiosInstance.get(
-        `/messages/applicant/conversation/${conversation.id}`
+      const response = await applicantAxios.get(
+        `/api/messages/applicant/conversation/${conversation.id}`,
+        {
+          headers: {
+            "X-Applicant-ID": applicantId,
+          },
+        }
       );
 
       if (response.data.status === "success") {
@@ -35,13 +40,16 @@ const MessagesModal = ({
     setSendingMessage(true);
 
     try {
-      const response = await axiosInstance.post("/messages/applicant/send", {
-        conversation_id: selectedConversation.id,
-        sender_id: applicantId,
-        receiver_id: selectedConversation.company_id,
-        message: newMessage,
-        is_from_client: false,
-      });
+      const response = await applicantAxios.post(
+        `/api/messages/applicant/send`,
+        {
+          conversation_id: selectedConversation.id,
+          sender_id: applicantId,
+          receiver_id: selectedConversation.company_id,
+          message: newMessage,
+          is_from_client: false,
+        }
+      );
 
       if (response.data.status === "success") {
         setNewMessage("");
@@ -75,8 +83,13 @@ const MessagesModal = ({
 
     const pollInterval = setInterval(async () => {
       try {
-        const response = await axiosInstance.get(
-          `/messages/applicant/conversation/${selectedConversation.id}`
+        const response = await applicantAxios.get(
+          `/api/messages/applicant/conversation/${selectedConversation.id}`,
+          {
+            headers: {
+              "X-Applicant-ID": applicantId,
+            },
+          }
         );
 
         if (response.data.status === "success") {
