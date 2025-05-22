@@ -88,15 +88,13 @@ const Applicants = () => {
     }
 
     try {
-      // Convert date format from YYYY-MM-DD to MM/DD/YYYY
-      const formatDate = (dateString) => {
+      const formatDateForLaravel = (dateString) => {
         if (!dateString) return "";
-        const [year, month, day] = dateString.split("-");
-        return `${month}/${day}/${year}`;
+
+        return dateString;
       };
 
-      // Convert time to 12 hour format with AM/PM
-      const formatTime = (timeString) => {
+      const formatTimeForLaravel = (timeString) => {
         if (!timeString) return "";
         const [hours, minutes] = timeString.split(":");
         const hour = parseInt(hours);
@@ -105,12 +103,13 @@ const Applicants = () => {
         return `${hour12}:${minutes} ${ampm}`;
       };
 
-      const formatAttendees = (attendeesString) => {
-        if (!attendeesString) return [];
+      const formatAttendeesForLaravel = (attendeesString) => {
+        if (!attendeesString) return "";
 
         const attendeeArray = attendeesString
           .split(",")
-          .map((email) => email.trim());
+          .map((email) => email.trim())
+          .filter((email) => email);
 
         if (
           !attendeeArray.includes("automatic-message@rcccolabsolutions.com")
@@ -118,30 +117,42 @@ const Applicants = () => {
           attendeeArray.unshift("automatic-message@rcccolabsolutions.com");
         }
 
-        return JSON.stringify(attendeeArray);
+        return attendeeArray.join(",");
       };
+
+      let clientId;
+      try {
+        const dashboardResponse = await axiosInstance.get("/dashboard");
+        if (dashboardResponse.data && dashboardResponse.data.company_id) {
+          clientId = parseInt(dashboardResponse.data.company_id);
+        }
+      } catch (dashError) {
+        console.error("Error fetching company ID:", dashError);
+        showToast("Failed to get company information", "error");
+        return;
+      }
+
+      if (!clientId) {
+        showToast("Unable to determine company ID", "error");
+        return;
+      }
 
       const scheduleData = {
         applicant_id: parseInt(selectedApplicantForStatus.id),
         job_posting_id: parseInt(selectedApplicantForStatus.priority_job_id),
-        client_id: 7,
+        client_id: clientId,
         subject: interviewDetails.title.trim(),
-
-        attendee: formatAttendees(interviewDetails.attendees),
-
-        start_schedule_date: formatDate(interviewDetails.startDate),
-        start_schedule_time: formatTime(interviewDetails.startTime),
-        end_schedule_date: formatDate(interviewDetails.endDate),
-        end_schedule_time: formatTime(interviewDetails.endTime),
+        attendee: formatAttendeesForLaravel(interviewDetails.attendees),
+        start_schedule_date: formatDateForLaravel(interviewDetails.startDate),
+        start_schedule_time: formatTimeForLaravel(interviewDetails.startTime),
+        end_schedule_date: formatDateForLaravel(interviewDetails.endDate),
+        end_schedule_time: formatTimeForLaravel(interviewDetails.endTime),
         schedule_type: interviewDetails.locationType,
-
         location:
           interviewDetails.locationType === "physical"
-            ? interviewDetails.location.trim() || "Office"
+            ? interviewDetails.location?.trim() || "Office"
             : "Teams",
-        remarks: interviewDetails.remarks
-          ? interviewDetails.remarks.trim()
-          : "",
+        remarks: interviewDetails.remarks?.trim() || "",
       };
 
       const response = await axiosInstance.post(
@@ -177,11 +188,21 @@ const Applicants = () => {
 
       const responseData = error.response?.data;
 
-      if (responseData && responseData.message) {
-        showToast(
-          `Database error: ${responseData.message.split(":").pop().trim()}`,
-          "error"
-        );
+      if (responseData) {
+        if (responseData.errors) {
+          const errorMessages = Object.entries(responseData.errors)
+            .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+            .join("\n");
+          console.error("Validation errors:", errorMessages);
+          showToast(`Validation errors:\n${errorMessages}`, "error");
+        } else if (responseData.message) {
+          showToast(`Error: ${responseData.message}`, "error");
+        } else {
+          showToast(
+            "Failed to schedule interview. Please check the data.",
+            "error"
+          );
+        }
       } else {
         showToast(
           "Failed to schedule interview. Please try again later.",
