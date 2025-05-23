@@ -32,13 +32,13 @@ const CompanyProfile = () => {
           const data = response.data.companydata;
 
           setCompanyInfo({
-            companyName: data.company_name,
-            representative: data.representative_name,
-            email: data.company_email,
-            contactNumber: data.company_phone,
-            status: data.status,
-            cc: data.cc,
-            bcc: data.bcc,
+            companyName: data.company_name || "",
+            representative: data.representative_name || "",
+            email: data.company_email || "",
+            contactNumber: data.company_phone || "",
+            status: data.status || "",
+            cc: data.cc || "",
+            bcc: data.bcc || "",
           });
         }
       } catch (err) {

@@ -36,8 +36,33 @@ const Schedules = () => {
 
     const formatDateForInput = (dateString) => {
       if (!dateString) return "";
-      const [month, day, year] = dateString.split("/");
-      return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+
+      // Handle different date formats
+      let month, day, year;
+
+      if (dateString.includes("/")) {
+        [month, day, year] = dateString.split("/");
+      } else if (dateString.includes("-")) {
+        // Handle YYYY-MM-DD format
+        [year, month, day] = dateString.split("-");
+      } else {
+        // Try to parse as a date object
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+          month = (date.getMonth() + 1).toString();
+          day = date.getDate().toString();
+          year = date.getFullYear().toString();
+        } else {
+          return "";
+        }
+      }
+
+      // Ensure all values are strings and pad them
+      const monthStr = String(month || "").padStart(2, "0");
+      const dayStr = String(day || "").padStart(2, "0");
+      const yearStr = String(year || "");
+
+      return `${yearStr}-${monthStr}-${dayStr}`;
     };
 
     const formatTimeForInput = (timeString) => {

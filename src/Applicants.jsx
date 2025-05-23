@@ -1076,7 +1076,7 @@ const Applicants = () => {
                 onChange={(e) => setNewStatus(e.target.value)}
                 className="block w-full bg-white border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="" selected disabled>
+                <option value="" disabled>
                   Select Status
                 </option>
                 <option value="New">New</option>
